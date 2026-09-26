@@ -1,4 +1,5 @@
 .env
+.demo-credentials.json
 .env.*
 !.env.example
 .venv/
@@ -12,3 +13,5 @@ coverage/
 .DS_Store
 *.tsbuildinfo
 .tools/
+frontend/test-results/
+frontend/playwright-report/

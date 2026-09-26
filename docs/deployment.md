@@ -1,41 +1,26 @@
 # Deployment runbook
 
-Status: not deployed. Do not publish the UI as a working AI demo before validating the API, database, and provider.
+Status: not deployed. Keep the repository local until real generation and the complete hosted system pass verification.
 
-## Railway database and API
+## Database and API on Railway
 
-1. Create a PostgreSQL 17 service using a pgvector-enabled image (`pgvector/pgvector:pg17`) and a persistent volume mounted at `/var/lib/postgresql/data`. Configure a strong password and private network access. Confirm image suitability and Railway resource costs in the account before provisioning.
-2. Verify `CREATE EXTENSION IF NOT EXISTS vector` and `SELECT extversion FROM pg_extension WHERE extname='vector'`. If extension installation fails, fix the image before proceeding.
-3. Create an API service from this repository with root directory `backend`. It uses `Dockerfile` and `railway.toml` in that directory.
-4. Set `DATABASE_URL` using the private hostname and `postgresql+psycopg://` scheme; configure `JWT_SECRET`, `OPENROUTER_API_KEY`, `EMBEDDING_MODEL`, `LLM_MODEL`, and `CORS_ORIGINS` as a JSON array containing the exact frontend origin. Do not expose these through Vite variables.
-5. Use one replica/worker for the current in-memory rate limiter. Apply provider spending limits. Docker startup runs migrations before serving traffic. Review the migration logs and `/health`; an HTTP 200 alone does not prove working AI.
-6. Create admin and employee users with the management command from a Railway shell. Set demo employee credentials intentionally; do not publish administrator credentials.
-7. Seed the eight synthetic Markdown documents using the admin interface or local `seed.py` with `API_URL` pointing to Railway. Validate every upload and its source view.
+1. Check the current Railway plan, image support, persistent volume, and RAM allowance. FastEmbed caches its model inside the API image; measure API memory before selecting a service size. Do not assume a no-cost deployment. If a pgvector-enabled Railway PostgreSQL image/volume is impractical, evaluate Supabase PostgreSQL with pgvector before changing the architecture.
+2. Provision PostgreSQL 17 with a pgvector-enabled image and persistent volume. Confirm CREATE EXTENSION IF NOT EXISTS vector, extension version, and a 384-dimensional vector round-trip before migration. Do not use destructive volume commands.
+3. Deploy the API from backend using its Dockerfile. Set private DATABASE_URL with postgresql+psycopg://, JWT_SECRET, DEEPSEEK_API_KEY, AI_PROVIDER=deepseek, and an exact JSON array in CORS_ORIGINS. Keep all keys server-side. API startup applies Alembic migrations; inspect logs and check /health and /docs.
+4. Use one worker while rate limiting is process-local. Configure DeepSeek account spending limits. Create demo users privately and ingest only the eight synthetic documents. Verify chunks, model identity, and source views in the hosted database.
 
-## Vercel frontend
+## Frontend on Vercel
 
-1. Import the Git repository. Set root directory to `frontend`, build command `npm run build`, and output directory `dist`.
-2. Set `VITE_API_URL` to the public HTTPS Railway API origin before building.
-3. Deploy a preview. Add its exact origin to the API CORS list if testing there. Do not use wildcard CORS to support arbitrary previews.
-4. Run the public flow below. Only after it passes, deploy/promote production and update CORS to the intended production origin.
+1. After local DeepSeek E2E succeeds, import the repository with root frontend, build command npm run build, and output dist. Set VITE_API_URL to the Railway HTTPS API origin. Never put provider keys in VITE_ variables.
+2. Deploy a preview and add its exact origin to API CORS. Verify direct routes and refresh. Promote only after the full hosted acceptance tests pass.
 
-## Public acceptance checklist
+## Hosted acceptance
 
-- Health confirms storage connectivity; API docs at `/docs` load.
-- An employee can sign in, ask a VPN question, receive a supported answer, and open genuine source evidence.
-- A question about parental leave returns fallback; P1 guaranteed-resolution trap does not invent an SLA.
-- Refresh restores history. Another account cannot read it by changing IDs.
-- Feedback persists and analytics update from actual events.
-- Admin can ingest PDF/TXT/Markdown, reject invalid/empty files, reindex, and remove a source.
-- Removed sources disappear from future retrieval while earlier citations retain snapshots.
-- Unauthorized users receive 401; employees receive 403 for admin operations.
-- Unapproved origins receive no CORS permission; frontend bundles contain no provider key.
-- Mobile navigation and source inspection work; no unhandled console errors.
-- Evaluate the 12-case set using actual embeddings and generation, record results, and review support manually.
-- Record deployed commit, URLs, test evidence, remaining limitations, and secret-free Git status.
+- Real employee chat: supported, multi-source, unsupported, and low-relevance questions; inspect answer grounding and citation mapping.
+- History survives refresh and is isolated by account; feedback persists; admin analytics reflect events.
+- Document library and source excerpts work; admin upload/reindex/removal works with synthetic content.
+- Mobile layout and navigation work; direct routes refresh; CORS permits only configured origins; /docs loads.
+- No provider key appears in frontend bundles, logs, screenshots, or Git. Capture real screenshots from the deployed application only after these checks.
+- Run backend/frontend tests, browser regression, lint, build, migration check, secret scan, and Git status. Record exact results and hosted URLs in verification.md.
 
-## Current environment blockers
-
-Docker Desktop startup on the development machine fails inside its Inference Manager socket initialization. No database volumes were removed or reset. A working Docker engine or reachable PostgreSQL+pgvector database is required.
-
-An OpenRouter key and authorized Railway/Vercel project configuration have not yet been supplied in the project environment. Do not paste secrets into chat; configure them locally or in the providers' secret settings.
+DeepSeek credentials have not yet been supplied, and neither hosting service is provisioned. No hosted behavior or portfolio screenshot is claimed.

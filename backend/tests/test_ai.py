@@ -27,7 +27,7 @@ def test_no_context_does_not_call_provider(monkeypatch):
 
 def test_embedding_shape_rejected(monkeypatch):
     from types import SimpleNamespace
-    monkeypatch.setattr(ai, "get_settings", lambda: SimpleNamespace(embedding_model="test"))
+    monkeypatch.setattr(ai, "get_settings", lambda: SimpleNamespace(embedding_model="test", embedding_provider="openrouter", embedding_dimensions=1536))
     monkeypatch.setattr(ai, "request", lambda *args: {"data": [{"index": 0, "embedding": [0.1]}]})
     with pytest.raises(ai.ProviderError):
         ai.embed(["VPN"])
@@ -35,6 +35,6 @@ def test_embedding_shape_rejected(monkeypatch):
 
 def test_embedding_response_order(monkeypatch):
     from types import SimpleNamespace
-    monkeypatch.setattr(ai, "get_settings", lambda: SimpleNamespace(embedding_model="test"))
+    monkeypatch.setattr(ai, "get_settings", lambda: SimpleNamespace(embedding_model="test", embedding_provider="openrouter", embedding_dimensions=1536))
     monkeypatch.setattr(ai, "request", lambda *args: {"data": [{"index": 1, "embedding": [0.2] * 1536}, {"index": 0, "embedding": [0.1] * 1536}]})
     assert ai.embed(["first", "second"])[0][0] == 0.1

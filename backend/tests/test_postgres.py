@@ -24,11 +24,14 @@ def test_vector_persistence_and_cosine_retrieval():
                 doc = Document(title="VPN", filename="vpn.md", mime_type="text/markdown", embedding_model="test")
                 db.add(doc)
                 db.flush()
-                vector = [1.0] + [0.0] * 1535
+                vector = [1.0] + [0.0] * 383
                 db.add(Chunk(document_id=doc.id, chunk_index=0, content="VPN requires approval", embedding=vector))
                 db.commit()
                 db.expire_all()
-                result = db.execute(select(Chunk, (1 - Chunk.embedding.cosine_distance(vector)).label("score"))).one()
+                result = db.execute(
+                    select(Chunk, (1 - Chunk.embedding.cosine_distance(vector)).label("score"))
+                    .where(Chunk.document_id == doc.id)
+                ).one()
                 assert result[0].content == "VPN requires approval"
                 assert result[1] == pytest.approx(1.0)
         finally:

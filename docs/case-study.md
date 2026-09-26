@@ -17,7 +17,7 @@ The solution uses retrieval-augmented generation to narrow answers to approved s
 
 ## Results and remaining evidence
 
-Implementation and local component/unit checks exist. Real-provider quality metrics, database integration, deployment, and public end-to-end results are pending. No ROI, accuracy percentage, or production-readiness claim is made.
+Local FastEmbed, PostgreSQL/pgvector ingestion and search, and browser flows have been verified. The small synthetic retrieval set measured Hit@5 of 9/9 supported cases and retrieval-gate abstention of 3/5 unsupported cases. Generated-answer quality, deployment, and hosted end-to-end results are pending. No ROI or production-readiness claim is made.
 
 ## Portfolio-ready description
 
@@ -25,7 +25,7 @@ HelpDesk AI is an internal IT knowledge assistant built with React, FastAPI, and
 
 ## CV bullets (use after describing the current verification status)
 
-- Implemented a RAG knowledge assistant using React, FastAPI, PostgreSQL/pgvector, and OpenRouter, with document ingestion and source-linked answers.
+- Implemented a RAG knowledge assistant using React, FastAPI, PostgreSQL/pgvector, and local FastEmbed, with document ingestion and a DeepSeek generation adapter awaiting live validation.
 - Designed citation validation, retrieval audit records, and low-evidence fallbacks to make AI responses inspectable.
 - Modeled IT knowledge workflows and added administrator document management, conversation history, feedback, and usage analytics.
 

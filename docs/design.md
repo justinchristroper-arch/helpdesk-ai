@@ -34,14 +34,15 @@ Non-functional requirements: environment-only secrets; hashed passwords; backend
 
 ## Architecture
 
-React + TypeScript + Vite + Tailwind + React Router → FastAPI modular monolith → SQLAlchemy → PostgreSQL 17 + pgvector. Alembic owns schema changes. OpenRouter provides embeddings and answer generation. Docker Compose supports local operation; Vercel hosts frontend, Railway hosts API and pgvector PostgreSQL.
+React + TypeScript + Vite + Tailwind + React Router → FastAPI modular monolith → SQLAlchemy → PostgreSQL 17 + pgvector. Alembic owns schema changes. Local FastEmbed provides embeddings; DeepSeek is configured for answer generation but awaits a real authenticated test. Docker Compose works locally; Vercel and Railway are deployment targets, not yet deployed.
 
 ```mermaid
 flowchart LR
   Employee --> SPA[React SPA / Vercel]
   SPA --> API[FastAPI / Railway]
   API --> DB[(PostgreSQL 17 + pgvector)]
-  API --> Provider[OpenRouter]
+  API --> Embed[Local FastEmbed]
+  API --> Provider[DeepSeek when configured]
   Admin --> Ingestion[Validate / Extract / Chunk]
   Ingestion --> Provider
   Ingestion --> DB
@@ -56,10 +57,10 @@ Users own conversations; conversations own messages. Documents own versioned chu
 1. Validate upload (maximum 10 MB); reject unsupported, encrypted/unreadable, empty, or image-only documents. No OCR.
 2. Extract PDF page text or UTF-8 TXT/Markdown; normalize whitespace while retaining sections/pages.
 3. Split within pages/sections using configurable 700-token windows and 100-token overlap. This balances context with focused citations; short sections remain short.
-4. Embed with configurable `openai/text-embedding-3-small` (1536 dimensions). Store model identity; do not mix incompatible embedding spaces.
+4. Embed with `BAAI/bge-small-en-v1.5` (384 dimensions). Store model identity; do not mix incompatible embedding spaces.
 5. Embed question with the same model; cosine search approved active chunks; retrieve top 5. Start with exact search for the small demo corpus.
-6. Use configurable minimum cosine similarity 0.35 as an initial uncalibrated gate. Only qualifying chunks enter the prompt. Evaluate and tune using the synthetic evaluation set before making quality claims.
-7. Generate through configurable `google/gemini-2.5-flash-lite`. Treat documents as untrusted data, not instructions; require structured claims and source identifiers.
+6. Use configurable minimum cosine similarity 0.70 as an uncalibrated gate tuned on the 14-case synthetic set. Only qualifying chunks enter the prompt; two unsupported cases still pass this gate.
+7. Generate through configurable `deepseek-flash` once a key is supplied. Treat documents as untrusted data, not instructions; require structured claims and source identifiers. Live generation is unverified.
 8. Validate cited identifiers and quoted evidence against supplied chunks. Invalid or absent support causes fallback. Citation validity alone cannot prove semantic entailment; human evaluation remains necessary.
 9. Persist retrieval audit, displayed sources, outcome, model, and prompt version with the response.
 
@@ -67,18 +68,17 @@ Similarity is not confidence or semantic certainty. UI displays evidence availab
 
 ## Provider compatibility and deployment decisions
 
-Official OpenRouter documentation confirms `POST https://openrouter.ai/api/v1/embeddings` and lists `openai/text-embedding-3-small`; generation uses `/chat/completions`. Live authenticated compatibility must still be tested before deployment. Models are configurable because availability can change.
+The default embedding provider is local FastEmbed, and real 384-dimensional vectors were stored and searched in pgvector. DeepSeek's official documentation lists `deepseek-flash` and its chat completion endpoint, but authenticated compatibility must still be tested. OpenRouter remains an optional adapter.
 
-- https://openrouter.ai/docs/api/api-reference/embeddings/create-embeddings
-- https://openrouter.ai/docs/api/api-reference/embeddings/list-embeddings-models
-- https://openrouter.ai/google/gemini-2.5-flash-lite/performance
-- https://docs.railway.com/guides/embeddings-pipeline
+- https://qdrant.github.io/fastembed/Getting%20Started/
+- https://api-docs.deepseek.com/guides/harness
+- https://api-docs.deepseek.com/api/create-chat-completion/
 
-Use a Railway pgvector-enabled image with a persistent volume and verify `CREATE EXTENSION vector` before migrations. Do not assume the default PostgreSQL image contains pgvector. No database-provider switch is currently needed.
+The local pgvector image passed extension and migration checks. Railway support, resources, and cost must be verified before provisioning. If its pgvector setup is impractical, evaluate Supabase PostgreSQL with pgvector before changing architecture.
 
 ## Quality and release gates
 
-Pytest covers extraction, chunking, validation, provider failures, citation rejection, fallback, persistence, ownership, and feedback. PostgreSQL integration tests verify migrations, vector persistence, and retrieval. Frontend gates are build, lint, critical behavior tests, and browser verification. Synthetic evaluation reports only computed retrieval Hit@K, fallback outcomes, and checked citation validity; semantic answer support requires documented review.
+Pytest covers extraction, chunking, validation, provider failures, citation rejection, fallback, persistence, ownership, and feedback. Real PostgreSQL checks verified migrations, vectors, and retrieval. Frontend gates are build, lint, behavior tests, and local browser verification. The current synthetic evaluation measures retrieval Hit@K and retrieval-gate abstention only; citation correctness and semantic answer support require actual generation and review.
 
 Release requires real embeddings, seeded documents, public API and frontend integration, CORS verification, source inspection, negative queries, admin authorization, and clean secret-free Git status. Until these pass, no live-completion claim is permitted.
 

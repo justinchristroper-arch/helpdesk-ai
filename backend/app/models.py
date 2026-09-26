@@ -48,7 +48,7 @@ class Chunk(Base):
     page_number: Mapped[int | None]
     section: Mapped[str | None] = mapped_column(Text)
     content: Mapped[str] = mapped_column(Text)
-    embedding: Mapped[list[float]] = mapped_column(Vector(1536))
+    embedding: Mapped[list[float]] = mapped_column(Vector())
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 

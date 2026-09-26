@@ -213,7 +213,11 @@ export function App() {
               <LogOut size={16} />
             </button>
           ) : (
-            <button className="profile" onClick={() => setLoginOpen(true)}>
+            <button
+              className="profile"
+              aria-label="Sign in to HelpDesk AI"
+              onClick={() => setLoginOpen(true)}
+            >
               <span className="avatar">G</span>
               <span>
                 Guest workspace<small>Sign in to ask a question</small>

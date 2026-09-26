@@ -57,7 +57,7 @@ class Rating(BaseModel):
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
     db.execute(text("SELECT 1"))
-    return {"status": "ok", "ai_configured": bool(settings.openrouter_api_key)}
+    return {"status": "ok", "ai_configured": bool(settings.deepseek_api_key if settings.ai_provider == "deepseek" else settings.openrouter_api_key)}
 
 
 @app.post("/auth/login")

@@ -2,7 +2,7 @@
 
 Employees need to find IT procedures and check their authority. A generic cloud chatbot is not necessary for every bounded knowledge task.
 
-HelpDesk AI reuses a real PostgreSQL/pgvector foundation with server-side FastEmbed, curated semantic intent examples, exact source-backed facts and deterministic composition. Optional MindRouter synthesis can select approved facts for eligible answers when quota and API balance allow; its live fact-selection path remains unverified after two invalid model responses. Users ask natural questions, inspect citations, clarify an ambiguous topic, and continue a lightweight conversation without setting up a model or account.
+HelpDesk AI reuses a real PostgreSQL/pgvector foundation with server-side FastEmbed, curated semantic intent examples, exact source-backed facts and deterministic composition. Optional MindRouter synthesis can select approved facts for eligible answers when quota and API balance allow; its live path remains unverified because the tested DeepSeek and GLM routes exhausted the 300-token completion budget on reasoning before returning visible content. Users ask natural questions, inspect citations, clarify an ambiguous topic, and continue a lightweight conversation without setting up a model or account.
 
 Engineering decisions include persistent example embeddings, additive migrations, fail-closed verification when approved facts disappear, PostgreSQL-backed generation quotas, backend-controlled citations, isolated anonymous history, admin-only knowledge management, and explicit no-network fallback tests.
 

@@ -143,7 +143,6 @@ def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
     payload = {
         "model": settings.mindrouter_model,
         "max_tokens": settings.mindrouter_max_output_tokens,
-        "thinking": {"type": "disabled"},
         "messages": [
             {"role": "system", "content":
              "Answer only from the approved facts below. Be concise. Use source markers exactly as provided. "

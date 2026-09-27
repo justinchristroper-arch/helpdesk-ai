@@ -47,7 +47,9 @@ def counted_post(self, target, *args, **kwargs):
 
 question = "My MFA is broken while I'm working remotely. What should I do?"
 with patch.object(httpx.Client, "post", counted_post):
-    with TestClient(app) as client:
+    # Use a dedicated synthetic validation address so earlier provider diagnostics
+    # do not bypass or erase the persisted per-IP quota history.
+    with TestClient(app, client=("127.0.0.2", 50000)) as client:
         guest = client.post("/auth/guest")
         reply = client.post("/chat", headers={"Authorization": "Bearer " + guest.json()["token"]},
                             json={"question": question})

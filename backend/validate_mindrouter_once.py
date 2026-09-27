@@ -1,0 +1,84 @@
+"""Exactly one final HelpDesk synthesis request after local payload correction."""
+import json
+import os
+import re
+from unittest.mock import patch
+
+import httpx
+from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from app.config import get_settings
+from app.db import Session
+from app.main import app
+from app.models import Chunk, Document, Message, MessageSource
+
+if os.getenv("RUN_ONE_MINDROUTER_VALIDATION") != "1":
+    raise SystemExit("Set RUN_ONE_MINDROUTER_VALIDATION=1 to authorize exactly one final call.")
+
+settings = get_settings()
+external_calls = 0
+safe_http_error = None
+original_post = httpx.Client.post
+url = settings.mindrouter_base_url.rstrip("/") + "/chat/completions"
+
+
+def counted_post(self, target, *args, **kwargs):
+    global external_calls, safe_http_error
+    if str(target) == url:
+        external_calls += 1
+    response = original_post(self, target, *args, **kwargs)
+    if str(target) == url and not response.is_success:
+        try:
+            data = response.json()
+            error = data.get("error") if isinstance(data, dict) else None
+            message = error.get("message") if isinstance(error, dict) else None
+            if isinstance(message, str):
+                key = settings.mindrouter_api_key.get_secret_value() if settings.mindrouter_api_key else ""
+                message = message.replace(key, "[REDACTED]") if key else message
+                message = re.sub(r"sk_[A-Za-z0-9_-]{10,}", "[REDACTED]", message)[:500]
+            safe_http_error = {"type": error.get("type") if isinstance(error, dict) else None,
+                               "code": error.get("code") if isinstance(error, dict) else None,
+                               "message": message}
+        except ValueError:
+            safe_http_error = {"body_type": "non_json", "body_length": len(response.content)}
+    return response
+
+
+question = "My MFA is broken while I'm working remotely. What should I do?"
+with patch.object(httpx.Client, "post", counted_post):
+    with TestClient(app) as client:
+        guest = client.post("/auth/guest")
+        reply = client.post("/chat", headers={"Authorization": "Bearer " + guest.json()["token"]},
+                            json={"question": question})
+        assert reply.status_code == 200
+        message_id = reply.json()["message"]["id"]
+
+with Session() as db:
+    message = db.get(Message, message_id)
+    sources = list(db.scalars(select(MessageSource).where(MessageSource.message_id == message_id)
+                              .order_by(MessageSource.citation_number)))
+    citations = []
+    for source in sources:
+        chunk = db.get(Chunk, source.chunk_id)
+        document = db.get(Document, source.document_id)
+        citations.append({"number": source.citation_number, "document": source.title,
+                          "section": source.section, "chunk_id": source.chunk_id,
+                          "maps_to_postgres_chunk": bool(chunk and document and document.status == "ready"
+                              and chunk.document_id == document.id and chunk.content == source.excerpt)})
+    generation = (message.diagnostics or {}).get("generation") or {}
+    report = {"external_calls": external_calls, "question": question,
+              "requested_model": settings.mindrouter_model,
+              "http_status": generation.get("http_status"),
+              "reported_model": generation.get("response_model"),
+              "input_tokens": generation.get("input_tokens"),
+              "output_tokens": generation.get("output_tokens"),
+              "validation_reason": generation.get("validation_reason"),
+              "synthesis_used": generation.get("state") == "used" and message.model == settings.mindrouter_model,
+              "deterministic_fallback": message.model != settings.mindrouter_model,
+              "sanitized_response_structure": generation.get("response_shape"),
+              "sanitized_http_error": safe_http_error,
+              "citations": citations}
+print(json.dumps(report, indent=2))
+if external_calls != 1:
+    raise SystemExit("Expected exactly one external call")

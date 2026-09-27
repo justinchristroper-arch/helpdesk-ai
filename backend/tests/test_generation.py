@@ -61,7 +61,9 @@ def test_synthesis_selects_only_source_facts_and_backend_citations(monkeypatch):
     assert result.response_shape["content_type"] == "str"
     assert len(calls) == 1 and calls[0]["max_tokens"] == 300
     assert calls[0]["model"] == "deepseek/deepseek-flash"
-    assert calls[0]["response_format"] == {"type": "json_object"}
+    assert calls[0]["temperature"] == 0
+    assert "response_format" not in calls[0]
+    assert "tools" not in calls[0] and "reasoning_effort" not in calls[0]
 
 
 @pytest.mark.parametrize("content", [

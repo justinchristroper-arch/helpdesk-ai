@@ -125,7 +125,6 @@ def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
         "model": settings.mindrouter_model,
         "max_tokens": settings.mindrouter_max_output_tokens,
         "temperature": 0,
-        "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": "Return only short JSON: {\"fact_ids\":[\"1.1\",\"2.1\"]}. "
              "Select the most relevant supplied fact IDs, with at least one ID per source. "

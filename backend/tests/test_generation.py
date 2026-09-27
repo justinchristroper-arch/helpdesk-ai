@@ -21,7 +21,7 @@ def sample_answer():
 
 def settings(key="test-key"):
     return Settings(_env_file=None, jwt_secret="test-secret-with-at-least-32-characters", mindrouter_api_key=key,
-                    mindrouter_base_url="https://api.mindrouter.io/v1", mindrouter_model="zai/glm-5.3-flash")
+                    mindrouter_base_url="https://api.mindrouter.io/v1", mindrouter_model="openai/gpt-4.1-nano")
 
 
 def fake_http(monkeypatch, content, finish_reason="stop", status=200, error=None):
@@ -31,7 +31,7 @@ def fake_http(monkeypatch, content, finish_reason="stop", status=200, error=None
     def send(request):
         payload = json.loads(request.content)
         calls.append(payload)
-        body = error or {"model": "zai/glm-5.3-flash", "usage": {"prompt_tokens": 51, "completion_tokens": 17,
+        body = error or {"model": "openai/gpt-4.1-nano", "usage": {"prompt_tokens": 51, "completion_tokens": 17,
                          "completion_tokens_details": {"reasoning_tokens": 0}},
                          "choices": [{"finish_reason": finish_reason, "message": {"content": content}}]}
         return httpx.Response(status, json=body)
@@ -62,7 +62,7 @@ def test_synthesis_uses_only_verbatim_source_facts_and_backend_citations(monkeyp
     assert result.response_shape["content_type"] == "str"
     assert len(calls) == 1 and calls[0]["max_tokens"] == 300
     assert set(calls[0]) == {"model", "max_tokens", "messages"}
-    assert calls[0]["model"] == "zai/glm-5.3-flash"
+    assert calls[0]["model"] == "openai/gpt-4.1-nano"
     assert "temperature" not in calls[0]
     assert "response_format" not in calls[0]
     assert "tools" not in calls[0] and "reasoning_effort" not in calls[0] and "thinking" not in calls[0]

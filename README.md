@@ -2,13 +2,13 @@
 
 **Evidence-First IT Knowledge Assistant — Portfolio Project 4**
 
-HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional DeepSeek synthesis selects source-backed facts for multi-source answers when a backend key and daily quota are available. It is not a general-purpose generative chatbot.
+HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can select source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live fact-selection path has not yet passed validation; deterministic answers remain available.
 
 Status: local retrieval and deterministic fallback verified; hosted verification is tracked in [verification](docs/verification.md). Repository publication is not authorized.
 
 ## Why this architecture
 
-For a bounded IT knowledge base, approved facts and procedures can be composed without external generation. Multi-source answers may use one DeepSeek request to select relevant reviewed facts. The backend renders the facts and citations from verified database rows. DeepSeek use can incur charges and sends the question and approved facts to its service; leave the key unset to keep inference local. Hosting can also incur costs.
+For a bounded IT knowledge base, approved facts and procedures can be composed without external generation. Eligible answers may use one MindRouter request to select relevant reviewed facts. The backend renders the facts and citations from verified database rows. MindRouter use can incur charges and sends the question and approved facts to its service; leave the key unset to keep inference local. Hosting can also incur costs.
 
 ## How it works
 
@@ -18,13 +18,13 @@ For a bounded IT knowledge base, approved facts and procedures can be composed w
 4. Apply explainable similarity, scope, specificity, negative-example and ambiguity gates.
 5. Retrieve at most three deduplicated pgvector evidence chunks from the mapped active documents.
 6. Verify every approved factual sentence against its actual source text.
-7. Compose steps, checklists, policies or SLA guidance with real source metadata. For multi-source answers only, optionally ask DeepSeek to select and order approved fact IDs, then validate them and render backend-controlled citations. Quota exhaustion, invalid output and provider failure retain the deterministic answer.
+7. Compose steps, checklists, policies or SLA guidance with real source metadata. For multi-source answers or supported questions of at least 18 words with at least two facts, optionally ask MindRouter to select and order approved fact IDs. The backend validates IDs and renders citations. Quota exhaustion, invalid output and provider failure retain the deterministic answer.
 
 The FAQ path skips broader retrieval when the intent score is very high; it still queries and verifies authoritative evidence. Multi-source MFA/remote-work answers cite both documents. Unknown topics and undocumented details fall back; underspecified topics clarify.
 
 ## Local setup
 
-Copy .env.example to .env and set a strong database password, matching DATABASE_URL and random JWT_SECRET. An optional DEEPSEEK_API_KEY can be placed in ignored backend/.env. Run docker compose up --build -d. First startup applies Alembic 0004, seeds the eight bundled synthetic documents into an empty library, and indexes intent examples. Existing libraries are preserved.
+Copy .env.example to .env and set a strong database password, matching DATABASE_URL and random JWT_SECRET. An optional MINDROUTER_API_KEY can be placed in ignored backend/.env; its URL and model are environment settings. Run docker compose up --build -d. First startup applies Alembic 0004, seeds the eight bundled synthetic documents into an empty library, and indexes intent examples. Existing libraries are preserved.
 
 Run npm ci and npm run dev inside frontend. Open http://localhost:5173 and ask a question immediately. Guest sessions are isolated and stored in sessionStorage. Use the existing management command for an admin account: docker compose exec api python -m app.manage create-user --email admin@example.test --role admin.
 

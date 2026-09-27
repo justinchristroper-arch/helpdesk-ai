@@ -1,6 +1,6 @@
 # Architecture
 
-React/TypeScript/Vite → FastAPI → PostgreSQL 17 + pgvector. FastEmbed runs in the API process using a cached ONNX model. Optional DeepSeek synthesis runs only after retrieval and fact validation for multi-source answers.
+React/TypeScript/Vite → FastAPI → PostgreSQL 17 + pgvector. FastEmbed runs in the API process using a cached ONNX model. Optional MindRouter synthesis runs only after retrieval and fact validation for multi-source answers or supported long questions with at least two facts.
 
 ## Matching and evidence
 
@@ -16,7 +16,7 @@ Evidence lookup uses the already indexed canonical-question vector and exact map
 
 Templates change presentation only, selected by a deterministic query hash. The factual sentences come from reviewed knowledge records and current source text. Multi-source answers require every mapped source. Document deletion or changed facts invalidate future answers; prior message snapshots remain.
 
-When a multi-source answer is supported and DEEPSEEK_API_KEY is configured, the backend atomically reserves daily global, user and IP usage in PostgreSQL before one DeepSeek request. The request contains the question and approved fact IDs/text only. The model returns JSON fact IDs; the backend rejects unknown, duplicate or source-omitting IDs and renders only verbatim approved facts with its own citation numbers. Output is capped at 300 tokens by default. Missing key, exhausted quota, provider error, invalid response or missing evidence uses deterministic composition. Reservations count attempted calls, including failures.
+When synthesis is eligible and MINDROUTER_API_KEY is configured, the backend atomically reserves daily global, user and IP usage in PostgreSQL before one MindRouter request. The request contains the question and approved fact IDs/text only. The model returns JSON fact IDs; the backend rejects unknown, duplicate or source-omitting IDs and renders only verbatim approved facts with its own citation numbers. Output is capped at 300 tokens. Missing key, exhausted quota, provider error, invalid response or missing evidence uses deterministic composition. Reservations count attempted calls, including failures.
 
 ## Persistence and access
 

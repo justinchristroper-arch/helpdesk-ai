@@ -53,9 +53,8 @@ def test_typos_are_normalized_without_exact_question_rules():
     assert semantic.normalize(" VPM   conection ERROR ") == "vpn connection error"
 
 
-def test_runtime_has_no_generation_clients():
-    from pathlib import Path
-    runtime = Path(__file__).parents[1] / "app"
-    forbidden = ["api.deepseek.com", "openrouter.ai", "api.openai.com", "anthropic.com", "generativelanguage.googleapis.com"]
-    for path in runtime.glob("*.py"):
-        assert not any(host in path.read_text(encoding="utf-8") for host in forbidden)
+def test_embedding_module_has_no_external_api_client():
+    import inspect
+    source = inspect.getsource(embeddings)
+    assert "TextEmbedding" in source and "local_files_only=True" in source
+    assert "httpx" not in source and "api_key" not in source

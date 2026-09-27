@@ -35,7 +35,7 @@ This is one sequential local test, not a hosted benchmark, per-question latency 
 
 1. Check free account quotas and billing settings. Confirm private image registry availability; do not publish repository or image publicly.
 2. Provision Neon Free, enable pgvector, run migration 0004, and validate real vectors, retrieval and generation counters.
-3. Deploy the backend to Render using a private prebuilt image with its model cache. Render supports private registries; Docker Personal includes one private repository, subject to account availability. Store database credentials, JWT secret and optional DeepSeek key only in server configuration. DeepSeek API balance is currently insufficient (HTTP 402); deterministic retrieval remains available.
+3. Deploy the backend to Render using a private prebuilt image with its model cache. Render supports private registries; Docker Personal includes one private repository, subject to account availability. Store database credentials, JWT secret and optional MindRouter key only in server configuration. The direct DeepSeek trial previously returned HTTP 402; MindRouter is now the configured optional provider. Deterministic retrieval remains available.
 4. Deploy frontend to Vercel with the real API URL and exact CORS origins.
 5. Measure hosted cold/warm response behavior, memory, startup reliability and modest concurrent traffic. Run the complete hosted regression, scan bundles for secrets, and capture real deployed screenshots.
 

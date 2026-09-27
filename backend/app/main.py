@@ -57,7 +57,7 @@ class Rating(BaseModel):
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
     db.execute(text("SELECT 1"))
-    return {"status": "ok", "inference": "local-fastembed", "external_ai_required": False, "optional_synthesis": "deepseek" if settings.deepseek_api_key else "disabled", "composer": semantic.VERSION}
+    return {"status": "ok", "inference": "local-fastembed", "external_ai_required": False, "optional_synthesis": "mindrouter" if settings.mindrouter_api_key else "disabled", "composer": semantic.VERSION}
 
 
 @app.post("/auth/guest", status_code=201)
@@ -168,12 +168,12 @@ def chat(body: Question, request: Request, user: User = Depends(current_user), d
     conversation = owned_conversation(db, body.conversation_id, user) if body.conversation_id else None
     result = semantic.answer(db, question, conversation.context if conversation else None)
     model = settings.embedding_model
-    if generation.should_synthesize(result):
-        synthesis, state = generation.synthesize(question, result, user.id, request.client.host if request.client else "unknown")
-        result.diagnostics["generation"] = state
-        if synthesis:
-            result.content = synthesis
-            model = settings.deepseek_model
+    if generation.should_synthesize(result, question):
+        synthesis = generation.synthesize(question, result, user.id, request.client.host if request.client else "unknown")
+        result.diagnostics["generation"] = synthesis.diagnostics()
+        if synthesis.answer:
+            result.content = synthesis.answer
+            model = settings.mindrouter_model
     if conversation is None:
         conversation = Conversation(user_id=user.id, title=question[:120])
         db.add(conversation)

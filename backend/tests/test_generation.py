@@ -20,7 +20,8 @@ def sample_answer():
 
 
 def settings(key="test-key"):
-    return Settings(_env_file=None, jwt_secret="test-secret-with-at-least-32-characters", deepseek_api_key=key)
+    return Settings(_env_file=None, jwt_secret="test-secret-with-at-least-32-characters", mindrouter_api_key=key,
+                    mindrouter_base_url="https://api.mindrouter.io/v1", mindrouter_model="deepseek/deepseek-flash")
 
 
 def fake_http(monkeypatch, content, finish_reason="stop", status=200):
@@ -30,8 +31,8 @@ def fake_http(monkeypatch, content, finish_reason="stop", status=200):
     def send(request):
         payload = json.loads(request.content)
         calls.append(payload)
-        return httpx.Response(status, json={"choices": [{"finish_reason": finish_reason,
-            "message": {"content": content}}]})
+        return httpx.Response(status, json={"model": "deepseek/deepseek-flash", "usage": {"prompt_tokens": 51, "completion_tokens": 17},
+            "choices": [{"finish_reason": finish_reason, "message": {"content": content}}]})
 
     class Client:
         def __init__(self, **kwargs):
@@ -51,9 +52,12 @@ def test_synthesis_selects_only_source_facts_and_backend_citations(monkeypatch):
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: True)
     calls = fake_http(monkeypatch, '{"fact_ids":["2.1","1.1"]}')
-    answer, state = generation.synthesize("What should I do?", sample_answer(), "user", "127.0.0.1")
-    assert state == "used" and answer.endswith("• Use a trusted network. [2]\n• Contact IT for MFA reset. [1]")
+    result = generation.synthesize("What should I do?", sample_answer(), "user", "127.0.0.1")
+    assert result.state == "used" and result.answer.endswith("• Use a trusted network. [2]\n• Contact IT for MFA reset. [1]")
+    assert result.diagnostics()["http_success"] is True
+    assert (result.input_tokens, result.output_tokens) == (51, 17)
     assert len(calls) == 1 and calls[0]["max_tokens"] == 300
+    assert calls[0]["model"] == "deepseek/deepseek-flash"
     assert calls[0]["response_format"] == {"type": "json_object"}
 
 
@@ -65,32 +69,44 @@ def test_invalid_synthesis_falls_back_without_using_model_text(monkeypatch, cont
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: True)
     calls = fake_http(monkeypatch, content)
-    answer, state = generation.synthesize("Question", sample_answer(), "user", "ip")
-    assert answer is None and state in {"invalid_response", "provider_failure"}
+    result = generation.synthesize("Question", sample_answer(), "user", "ip")
+    assert result.answer is None and result.state in {"invalid_response", "provider_failure"}
     assert len(calls) == 1
 
 
 def test_disabled_or_quota_skips_network(monkeypatch):
     monkeypatch.setattr(generation, "get_settings", lambda: settings(""))
-    assert generation.synthesize("Q", sample_answer(), "u", "ip") == (None, "disabled")
+    assert generation.synthesize("Q", sample_answer(), "u", "ip").state == "disabled"
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: False)
-    assert generation.synthesize("Q", sample_answer(), "u", "ip") == (None, "quota_or_storage")
+    assert generation.synthesize("Q", sample_answer(), "u", "ip").state == "quota_or_storage"
 
 
 def test_provider_http_failure_is_single_call_and_fallback(monkeypatch):
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: True)
     calls = fake_http(monkeypatch, "{}", status=402)
-    assert generation.synthesize("Q", sample_answer(), "u", "ip") == (None, "provider_http_402")
+    result = generation.synthesize("Q", sample_answer(), "u", "ip")
+    assert result.state == "provider_http_402" and result.called and result.http_status == 402
     assert len(calls) == 1
+
+
+def test_complete_json_at_token_limit_remains_safe(monkeypatch):
+    monkeypatch.setattr(generation, "get_settings", lambda: settings())
+    monkeypatch.setattr(generation, "reserve", lambda *args: True)
+    calls = fake_http(monkeypatch, '{"fact_ids":["1.1","2.1"]}', finish_reason="length")
+    result = generation.synthesize("Q", sample_answer(), "u", "ip")
+    assert result.state == "used" and result.finish_reason == "length" and len(calls) == 1
 
 
 def test_only_multisource_answer_eligible():
     result = sample_answer()
-    assert generation.should_synthesize(result)
+    assert generation.should_synthesize(result, "What should I do?")
     result.sources = result.sources[:1]
-    assert not generation.should_synthesize(result)
+    assert not generation.should_synthesize(result, "What should I do?")
+    result.sources = [(result.sources[0][0], result.sources[0][1], .9,
+                       ["Contact IT for MFA reset.", "Use a trusted network."])]
+    assert generation.should_synthesize(result, "I am currently far from the office and need to get my broken sign in app fixed before I can work; what steps should I follow?")
     result.sources = sample_answer().sources
     result.outcome = "fallback"
-    assert not generation.should_synthesize(result)
+    assert not generation.should_synthesize(result, "What should I do?")

@@ -24,9 +24,10 @@ class Settings(BaseSettings):
     evidence_minimum: float = Field(default=0.50, ge=0, le=1)
     minimum_similarity: float = Field(default=0.70, ge=0, le=1)
     max_upload_bytes: int = 10 * 1024 * 1024
-    deepseek_api_key: SecretStr | None = None
-    deepseek_model: str = "deepseek-flash"
-    deepseek_max_output_tokens: int = Field(default=300, ge=64, le=1024)
+    mindrouter_api_key: SecretStr | None = None
+    mindrouter_base_url: str = "https://api.mindrouter.io/v1"
+    mindrouter_model: str = "deepseek/deepseek-flash"
+    mindrouter_max_output_tokens: int = Field(default=300, ge=64, le=300)
     generation_user_daily_limit: int = Field(default=3, ge=1, le=100)
     generation_ip_daily_limit: int = Field(default=8, ge=1, le=500)
     generation_global_daily_limit: int = Field(default=20, ge=1, le=10000)

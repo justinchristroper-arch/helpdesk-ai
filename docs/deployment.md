@@ -1,12 +1,12 @@
 # Deployment runbook
 
-Frontend target: Vercel. The original isolated Railway deployment is blocked by the account's free resource provisioning limit. The user requested evaluation of free alternatives before migration; see [hosting assessment](hosting-options.md). No alternative resources or app deployments have been created. Vercel is linked only. No GitHub push is required. Optional DeepSeek credentials remain backend-only.
+Frontend target: Vercel. The original isolated Railway deployment is blocked by the account's free resource provisioning limit. The user requested evaluation of free alternatives before migration; see [hosting assessment](hosting-options.md). No alternative resources or app deployments have been created. Vercel is linked only. No GitHub push is required. Optional MindRouter credentials remain backend-only.
 
 ## Backend
 
 Build from backend using its Dockerfile/railway.toml. The model and tokenizer download during build; the resulting model cache was approximately 65 MB locally. Runtime uses local files only. Startup applies migrations, seeds bundled demo documents only for a new library, and idempotently indexes intents.
 
-Use PostgreSQL with pgvector, persistent storage, private networking and DATABASE_URL in postgresql+psycopg format. Configure JWT_SECRET and exact CORS_ORIGINS. Set optional DEEPSEEK_API_KEY only in the backend environment; never place it in frontend variables or the image. Use one API worker until ordinary request limits are shared. Verify extension and revision 0004 in the hosted database. PostgreSQL generation counters already work across workers.
+Use PostgreSQL with pgvector, persistent storage, private networking and DATABASE_URL in postgresql+psycopg format. Configure JWT_SECRET and exact CORS_ORIGINS. Set optional MINDROUTER_API_KEY only in the backend environment; never place it in frontend variables or the image. MINDROUTER_BASE_URL and MINDROUTER_MODEL are backend environment settings. Use one API worker until ordinary request limits are shared. Verify extension and revision 0004 in the hosted database. PostgreSQL generation counters already work across workers.
 
 Railway could not provision a project, so its hosted pgvector image has not been tested. This is a quota blocker, not a pgvector failure. Neon and Supabase have been evaluated as alternatives; no switch has been made.
 

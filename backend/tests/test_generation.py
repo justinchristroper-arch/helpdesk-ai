@@ -24,15 +24,16 @@ def settings(key="test-key"):
                     mindrouter_base_url="https://api.mindrouter.io/v1", mindrouter_model="deepseek/deepseek-flash")
 
 
-def fake_http(monkeypatch, content, finish_reason="stop", status=200):
+def fake_http(monkeypatch, content, finish_reason="stop", status=200, error=None):
     calls = []
     original_client = httpx.Client
 
     def send(request):
         payload = json.loads(request.content)
         calls.append(payload)
-        return httpx.Response(status, json={"model": "deepseek/deepseek-flash", "usage": {"prompt_tokens": 51, "completion_tokens": 17},
-            "choices": [{"finish_reason": finish_reason, "message": {"content": content}}]})
+        body = error or {"model": "deepseek/deepseek-flash", "usage": {"prompt_tokens": 51, "completion_tokens": 17},
+                         "choices": [{"finish_reason": finish_reason, "message": {"content": content}}]}
+        return httpx.Response(status, json=body)
 
     class Client:
         def __init__(self, **kwargs):
@@ -56,6 +57,8 @@ def test_synthesis_selects_only_source_facts_and_backend_citations(monkeypatch):
     assert result.state == "used" and result.answer.endswith("• Use a trusted network. [2]\n• Contact IT for MFA reset. [1]")
     assert result.diagnostics()["http_success"] is True
     assert (result.input_tokens, result.output_tokens) == (51, 17)
+    assert result.validation_reason == "passed"
+    assert result.response_shape["content_type"] == "str"
     assert len(calls) == 1 and calls[0]["max_tokens"] == 300
     assert calls[0]["model"] == "deepseek/deepseek-flash"
     assert calls[0]["response_format"] == {"type": "json_object"}
@@ -71,6 +74,8 @@ def test_invalid_synthesis_falls_back_without_using_model_text(monkeypatch, cont
     calls = fake_http(monkeypatch, content)
     result = generation.synthesize("Question", sample_answer(), "user", "ip")
     assert result.answer is None and result.state in {"invalid_response", "provider_failure"}
+    if result.state == "invalid_response":
+        assert result.validation_reason in {"content_not_fact_ids_json", "invalid_fact_ids"}
     assert len(calls) == 1
 
 
@@ -85,9 +90,15 @@ def test_disabled_or_quota_skips_network(monkeypatch):
 def test_provider_http_failure_is_single_call_and_fallback(monkeypatch):
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: True)
-    calls = fake_http(monkeypatch, "{}", status=402)
+    calls = fake_http(monkeypatch, "{}", status=402,
+                      error={"error": {"type": "billing_error", "code": "insufficient_balance", "message": "private detail"}})
     result = generation.synthesize("Q", sample_answer(), "u", "ip")
     assert result.state == "provider_http_402" and result.called and result.http_status == 402
+    assert result.validation_reason == "http_error_before_validation"
+    assert result.response_shape == {"root_type": "dict", "root_keys": ["error"],
+        "error_type": "billing_error", "error_code": "insufficient_balance",
+        "error_keys": ["code", "message", "type"], "message_present": True, "message_length": 14}
+    assert "private detail" not in json.dumps(result.diagnostics())
     assert len(calls) == 1
 
 

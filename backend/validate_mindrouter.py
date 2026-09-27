@@ -73,6 +73,11 @@ def inspect_answer(message_id):
                 "input_tokens": diagnostic.get("input_tokens"),
                 "output_tokens": diagnostic.get("output_tokens"),
                 "generation_state": diagnostic.get("state"),
+                "model_output_passed_validation": diagnostic.get("validation_reason") == "passed",
+                "validation_reason": diagnostic.get("validation_reason"),
+                "sanitized_response_structure": diagnostic.get("response_shape"),
+                "synthesis_used": diagnostic.get("state") == "used" and message.model == settings.mindrouter_model,
+                "deterministic_fallback_occurred": message.model != settings.mindrouter_model,
                 "answer": message.content, "citations": citations,
                 "all_citations_map_to_retrieved_chunks": bool(citations) and all(c["maps_to_retrieved_chunk"] for c in citations) and facts_map}
 

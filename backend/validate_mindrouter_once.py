@@ -78,9 +78,11 @@ with Session() as db:
               "reasoning_tokens": generation.get("reasoning_tokens"),
               "finish_reason": generation.get("finish_reason"),
               "visible_content_length": (generation.get("response_shape") or {}).get("content_length"),
+              "referenced_fact_ids": generation.get("referenced_fact_ids"),
               "validation_reason": generation.get("validation_reason"),
               "synthesis_used": generation.get("state") == "used" and message.model == settings.mindrouter_model,
               "deterministic_fallback": message.model != settings.mindrouter_model,
+              "final_public_answer": message.content,
               "sanitized_response_structure": generation.get("response_shape"),
               "sanitized_http_error": safe_http_error,
               "citations": citations}

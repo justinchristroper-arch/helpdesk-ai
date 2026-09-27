@@ -10,7 +10,47 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import get_settings
 from app.db import Session
-from app.models import GenerationUsage
+from app.models import Chunk, Document, GenerationUsage
+
+
+MAX_SYNTHESIS_CHARS = 2400
+MARKER_RE = re.compile(r"\[(F\d+(?:\s*,\s*F\d+)*)\]\s*$")
+NUMBER_RE = re.compile(r"(?<![A-Za-z])\d+(?:[.,]\d+)*(?![A-Za-z])")
+URL_RE = re.compile(r"(?i)\b(?:https?://|www\.)\S+")
+EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
+PHONE_RE = re.compile(r"(?<!\w)(?:\+?\d[\d ()-]{5,}\d)(?!\w)")
+MULTI_SENTENCE_RE = re.compile(r"[.!?][\"')]*\s+[A-Z0-9]")
+TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z'-]*")
+STOPWORDS = {"a", "an", "and", "are", "as", "at", "be", "before", "below", "by", "for", "from",
+             "if", "in", "into", "is", "it", "of", "on", "or", "that", "the", "their", "them", "then",
+             "to", "use", "when", "while", "with", "your", "you"}
+TOKEN_ALIASES = {"verify": "check", "verifies": "check", "verified": "check", "connectivity": "network",
+                 "reachable": "network", "reach": "contact", "working": "work", "beforehand": "before",
+                 "helpdesk": "support", "desk": "support", "device": "laptop", "authentication": "mfa",
+                 "required": "require", "requires": "require", "requirements": "require",
+                 "allowed": "allow", "allows": "allow", "policies": "policy"}
+POLICY_TERMS = {"administrator", "allow", "approval", "approve", "approved", "authorized", "bypass",
+                "critical", "deadline", "denied", "disable", "eligible", "exception", "fee", "forbidden",
+                "guaranteed", "hr", "immediately", "ineligible", "legal", "manager", "mandatory", "must",
+                "permission", "policy", "priority", "prohibited", "rejected", "require", "security",
+                "severity", "sla", "status", "supervisor", "urgent", "waiver"}
+
+
+@dataclass(frozen=True)
+class ApprovedFact:
+    fact_id: str
+    text: str
+    citation_number: int
+    chunk_id: str | None = None
+    document_id: str | None = None
+    chunk_content: str | None = None
+
+
+@dataclass
+class GroundingResult:
+    answer: str | None
+    fact_ids: list[str]
+    reason: str
 
 
 @dataclass
@@ -26,6 +66,7 @@ class SynthesisResult:
     finish_reason: str | None = None
     validation_reason: str | None = None
     response_shape: dict | None = None
+    referenced_fact_ids: list[str] | None = None
 
     def diagnostics(self):
         return {"provider": "mindrouter", "state": self.state, "called": self.called,
@@ -34,7 +75,8 @@ class SynthesisResult:
                 "input_tokens": self.input_tokens, "output_tokens": self.output_tokens,
                 "reasoning_tokens": self.reasoning_tokens,
                 "response_model": self.response_model, "finish_reason": self.finish_reason,
-                "validation_reason": self.validation_reason, "response_shape": self.response_shape}
+                "validation_reason": self.validation_reason, "response_shape": self.response_shape,
+                "referenced_fact_ids": self.referenced_fact_ids}
 
 
 def sanitized_shape(data, choice=None):
@@ -112,21 +154,88 @@ def should_synthesize(result, question: str) -> bool:
     return len(result.sources) > 1 or (len(question.split()) >= 18 and facts >= 2)
 
 
-def approved_lines(content: str, facts: list[tuple[str, int]]) -> list[tuple[str, int]] | None:
-    """Accept only complete, verbatim approved facts with backend-issued markers."""
-    allowed = {f"{fact} [{source}]": (fact, source) for fact, source in facts}
-    selected = []
+def normalized_tokens(value: str) -> set[str]:
+    tokens = set()
+    for raw in TOKEN_RE.findall(value.lower()):
+        token = TOKEN_ALIASES.get(raw, raw)
+        if token not in STOPWORDS:
+            tokens.add(token)
+    return tokens
+
+
+def unsupported_values(sentence: str, evidence: str) -> str | None:
+    for name, pattern in (("url", URL_RE), ("email", EMAIL_RE), ("phone", PHONE_RE), ("number", NUMBER_RE)):
+        allowed = {match.group(0).lower() for match in pattern.finditer(evidence)}
+        supplied = {match.group(0).lower() for match in pattern.finditer(sentence)}
+        if not supplied.issubset(allowed):
+            return f"unsupported_{name}"
+    sentence_terms = normalized_tokens(sentence) & POLICY_TERMS
+    evidence_terms = normalized_tokens(evidence)
+    if not sentence_terms.issubset(evidence_terms):
+        return "unsupported_policy_term"
+    return None
+
+
+def validate_grounded_content(content: str, facts: list[ApprovedFact]) -> GroundingResult:
+    """Validate fact markers and conservative deterministic grounding without another model."""
+    if not isinstance(content, str) or not content.strip():
+        return GroundingResult(None, [], "empty_content")
+    if len(content) > MAX_SYNTHESIS_CHARS:
+        return GroundingResult(None, [], "content_too_long")
+    allowed = {fact.fact_id: fact for fact in facts}
+    rendered, referenced = [], []
     for raw_line in content.splitlines():
         line = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", raw_line).strip()
         if not line:
             continue
-        item = allowed.get(line)
-        if item is None or item in selected:
-            return None
-        selected.append(item)
-    if not selected or {source for _, source in selected} != {source for _, source in facts}:
-        return None
-    return selected
+        match = MARKER_RE.search(line)
+        if not match:
+            reason = "malformed_fact_marker" if "[" in line or "]" in line else "sentence_without_fact_id"
+            return GroundingResult(None, referenced, reason)
+        sentence = line[:match.start()].strip()
+        if not sentence or "[" in sentence or "]" in sentence or MULTI_SENTENCE_RE.search(sentence):
+            return GroundingResult(None, referenced, "malformed_sentence")
+        fact_ids = [item.strip() for item in match.group(1).split(",")]
+        referenced.extend(fact_ids)
+        if len(set(fact_ids)) != len(fact_ids) or any(fact_id not in allowed for fact_id in fact_ids):
+            return GroundingResult(None, referenced, "unknown_or_duplicate_fact_id")
+        evidence = " ".join(allowed[fact_id].text for fact_id in fact_ids)
+        unsupported = unsupported_values(sentence, evidence)
+        if unsupported:
+            return GroundingResult(None, referenced, unsupported)
+        sentence_tokens, evidence_tokens = normalized_tokens(sentence), normalized_tokens(evidence)
+        overlap = sentence_tokens & evidence_tokens
+        if len(overlap) < 2 or (sentence_tokens and len(overlap) / len(sentence_tokens) < 0.35):
+            return GroundingResult(None, referenced, "insufficient_fact_overlap")
+        citations = []
+        for fact_id in fact_ids:
+            citation = allowed[fact_id].citation_number
+            if citation not in citations:
+                citations.append(citation)
+        rendered.append(f"{sentence} [{','.join(str(item) for item in citations)}]")
+    if not rendered:
+        return GroundingResult(None, referenced, "empty_content")
+    cited_sources = {allowed[fact_id].citation_number for fact_id in referenced if fact_id in allowed}
+    if cited_sources != {fact.citation_number for fact in facts}:
+        return GroundingResult(None, referenced, "incomplete_source_coverage")
+    return GroundingResult("\n".join(rendered), referenced, "passed")
+
+
+def evidence_is_active(facts: list[ApprovedFact]) -> bool:
+    """Recheck that every model-visible fact still belongs to an active retrieved chunk."""
+    if any(not fact.chunk_id or not fact.document_id for fact in facts):
+        return False
+    try:
+        with Session() as db:
+            for fact in facts:
+                chunk = db.get(Chunk, fact.chunk_id)
+                document = db.get(Document, fact.document_id)
+                if (not chunk or not document or document.status != "ready" or
+                        chunk.document_id != document.id or chunk.content != fact.chunk_content):
+                    return False
+        return True
+    except SQLAlchemyError:
+        return False
 
 
 def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
@@ -137,19 +246,24 @@ def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
         return SynthesisResult(None, "disabled")
     if not reserve(user_id, ip):
         return SynthesisResult(None, "quota_or_storage")
-    facts = [(fact, source_number)
-             for source_number, (_, _, _, source_facts) in enumerate(result.sources, 1)
-             for fact in source_facts]
+    facts = []
+    for source_number, (chunk, document, _, source_facts) in enumerate(result.sources, 1):
+        for fact in source_facts:
+            facts.append(ApprovedFact(f"F{len(facts) + 1}", fact, source_number,
+                                      getattr(chunk, "id", None), getattr(document, "id", None),
+                                      getattr(chunk, "content", None)))
     payload = {
         "model": settings.mindrouter_model,
         "max_tokens": settings.mindrouter_max_output_tokens,
         "messages": [
             {"role": "system", "content":
-             "Answer only from the approved facts below. Be concise. Use source markers exactly as provided. "
-             "Copy each selected fact verbatim, followed by its source marker. Include at least one fact from "
-             "every source. Do not add a preface."},
+             "You are rewriting approved IT facts into a concise user-facing answer. Use only the approved facts "
+             "below. You may paraphrase naturally, but do not introduce requirements, numbers, steps, exceptions, "
+             "causes, contacts, or policy claims. Return one factual sentence per line, with no heading or bullets. "
+             "End every line with its supporting fact IDs exactly like [F1] or [F2,F3]. Use only provided IDs. "
+             "If the approved facts are insufficient, say so without inventing details."},
             {"role": "user", "content": "Question: " + question + "\nApproved facts:\n" +
-             "\n".join(f"- {fact} [{source}]" for fact, source in facts)},
+             "\n".join(f"{fact.fact_id}: {fact.text}" for fact in facts)},
         ],
     }
     status, input_tokens, output_tokens, reasoning_tokens, response_model = None, None, None, None, None
@@ -172,21 +286,35 @@ def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
         shape = sanitized_shape(data, choice)
         finish_reason = choice.get("finish_reason")
         if finish_reason not in {"stop", "length"}:
-            return SynthesisResult(None, "invalid_response", True, status, input_tokens, output_tokens,
-                                   reasoning_tokens, response_model, finish_reason, "unsupported_finish_reason", shape)
-        selected = approved_lines(choice["message"]["content"], facts)
-        if selected is None:
-            return SynthesisResult(None, "invalid_response", True, status, input_tokens, output_tokens,
-                                   reasoning_tokens, response_model, finish_reason,
-                                   "content_not_approved_facts", shape)
-        answer = "Based on the current IT knowledge base:\n\n" + "\n".join(
-            f"• {fact} [{source}]" for fact, source in selected)
-        return SynthesisResult(answer, "used", True, status, input_tokens, output_tokens,
-                               reasoning_tokens, response_model, finish_reason, "passed", shape)
+            return SynthesisResult(None, "invalid_response", called=True, http_status=status,
+                                   input_tokens=input_tokens, output_tokens=output_tokens,
+                                   reasoning_tokens=reasoning_tokens, response_model=response_model,
+                                   finish_reason=finish_reason, validation_reason="unsupported_finish_reason",
+                                   response_shape=shape)
+        grounded = validate_grounded_content(choice["message"]["content"], facts)
+        if not grounded.answer:
+            return SynthesisResult(None, "invalid_response", called=True, http_status=status,
+                                   input_tokens=input_tokens, output_tokens=output_tokens,
+                                   reasoning_tokens=reasoning_tokens, response_model=response_model,
+                                   finish_reason=finish_reason, validation_reason=grounded.reason,
+                                   response_shape=shape, referenced_fact_ids=grounded.fact_ids)
+        if not evidence_is_active(facts):
+            return SynthesisResult(None, "invalid_response", called=True, http_status=status,
+                                   input_tokens=input_tokens, output_tokens=output_tokens,
+                                   reasoning_tokens=reasoning_tokens, response_model=response_model,
+                                   finish_reason=finish_reason, validation_reason="inactive_evidence",
+                                   response_shape=shape, referenced_fact_ids=grounded.fact_ids)
+        answer = "Based on the current IT knowledge base:\n\n" + grounded.answer
+        return SynthesisResult(answer, "used", called=True, http_status=status,
+                               input_tokens=input_tokens, output_tokens=output_tokens,
+                               reasoning_tokens=reasoning_tokens, response_model=response_model,
+                               finish_reason=finish_reason, validation_reason="passed",
+                               response_shape=shape, referenced_fact_ids=grounded.fact_ids)
     except httpx.HTTPStatusError as exc:
         return SynthesisResult(None, f"provider_http_{exc.response.status_code}", True,
                                exc.response.status_code, validation_reason="http_error_before_validation",
                                response_shape=sanitized_error_shape(exc.response))
     except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError):
-        return SynthesisResult(None, "provider_failure", True, status, input_tokens, output_tokens,
-                               reasoning_tokens, response_model)
+        return SynthesisResult(None, "provider_failure", called=True, http_status=status,
+                               input_tokens=input_tokens, output_tokens=output_tokens,
+                               reasoning_tokens=reasoning_tokens, response_model=response_model)

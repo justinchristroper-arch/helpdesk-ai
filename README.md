@@ -2,13 +2,13 @@
 
 **Evidence-First IT Knowledge Assistant — Portfolio Project 4**
 
-HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can select verbatim source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live synthesis path has not yet passed validation; deterministic answers remain available.
+HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can paraphrase approved source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live synthesis path has not yet passed validation; deterministic answers remain available.
 
 Status: local retrieval and deterministic fallback verified; hosted verification is tracked in [verification](docs/verification.md). Repository publication is not authorized.
 
 ## Why this architecture
 
-For a bounded IT knowledge base, approved facts and procedures can be composed without external generation. Eligible answers may use one MindRouter request to select relevant reviewed facts. The backend renders the facts and citations from verified database rows. MindRouter use can incur charges and sends the question and approved facts to its service; leave the key unset to keep inference local. Hosting can also incur costs.
+For a bounded IT knowledge base, approved facts and procedures can be composed without external generation. Eligible answers may use one MindRouter request to rewrite relevant reviewed facts. The backend validates fact IDs and conservative structural grounding, then replaces internal IDs with citations from verified database rows. MindRouter use can incur charges and sends the question and approved facts to its service; leave the key unset to keep inference local. Hosting can also incur costs.
 
 ## How it works
 
@@ -18,7 +18,7 @@ For a bounded IT knowledge base, approved facts and procedures can be composed w
 4. Apply explainable similarity, scope, specificity, negative-example and ambiguity gates.
 5. Retrieve at most three deduplicated pgvector evidence chunks from the mapped active documents.
 6. Verify every approved factual sentence against its actual source text.
-7. Compose steps, checklists, policies or SLA guidance with real source metadata. For multi-source answers or supported questions of at least 18 words with at least two facts, optionally ask MindRouter to select and order verbatim approved facts with backend-issued markers. The backend validates the exact facts and renders citations. Quota exhaustion, invalid output and provider failure retain the deterministic answer.
+7. Compose steps, checklists, policies or SLA guidance with real source metadata. For multi-source answers or supported questions of at least 18 words with at least two facts, optionally ask MindRouter to rewrite approved facts marked with internal fact IDs. The backend validates markers, source coverage, unsupported values and evidence overlap, then renders public citations. Quota exhaustion, invalid output and provider failure retain the deterministic answer.
 
 The FAQ path skips broader retrieval when the intent score is very high; it still queries and verifies authoritative evidence. Multi-source MFA/remote-work answers cite both documents. Unknown topics and undocumented details fall back; underspecified topics clarify.
 

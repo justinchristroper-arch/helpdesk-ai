@@ -1,87 +1,27 @@
-# HelpDesk AI — Internal IT Knowledge Assistant
+# Architecture
 
-Portfolio Project 4. Status: design approved by project brief; implementation in progress. All policies and usage in the demonstration are synthetic.
+React/TypeScript/Vite → FastAPI → PostgreSQL 17 + pgvector. FastEmbed runs in the API process using a cached ONNX model. No external generation or embedding client is present.
 
-## Business problem and objectives
+## Matching and evidence
 
-Employees search scattered IT instructions, ask support repeated questions, and risk following outdated procedures. HelpDesk AI makes approved knowledge searchable through questions, with evidence employees can inspect. The objective is demonstrable retrieval and traceability; no time savings or ROI is claimed without measurement.
+The JSON dataset contains 18 intent records with canonical questions, diverse paraphrases, keywords, negative examples, answer types, source sections and exact reviewed facts. Source files live in backend/knowledge. IntentExample stores positive and negative vectors, model identity and dataset hash. Only current-hash examples participate; unchanged examples reuse embeddings.
 
-## Stakeholders and workflows
+Each request embeds one normalized query. Limited follow-ups add the active topic (or canonical question for generic continuations). Explicit topic changes do not inherit context. A fallback clears topic context. No complex coreference model is used.
 
-Employees ask questions and verify sources. IT administrators maintain approved documents and inspect feedback. Policy owners are responsible for correctness. Recruiters evaluate engineering decisions and reproducible results.
+The matcher takes maximum cosine similarity per intent and polarity. Required scope groups remove inapplicable specialized intents (e.g. remote MFA requires both topics). Clear lexical specificity may choose a candidate within 0.08 of the best score. Negative examples within 0.025 of the chosen positive score reject it. Unsupported facet patterns reject details absent from the policy, such as VPN approval duration.
 
-AS-IS: employee searches documents → cannot find procedure → contacts IT → waits → receives manual answer or link. Pain points are discoverability, repeated work, inconsistent advice, and outdated links.
+Central settings: minimum intent score 0.72; without keyword support 0.81; ambiguity margin 0.025 (0.06 for short queries); FAQ score 0.94; source cosine floor 0.50; top-k 3. These are tuned demo gates, not calibrated confidence. Underspecified access and topic-only queries clarify using actual matching intents.
 
-TO-BE: employee asks → system retrieves approved chunks → generates supported answer → exposes citations → employee verifies. Insufficient evidence produces an explicit fallback and direction to IT support.
+Evidence lookup uses the already indexed canonical-question vector and exact mapped filename/section, filtering ready documents and embedding model. This avoids discarding valid symptom queries solely because source wording differs. The semantic path also records broad top-k document candidates; the FAQ path omits that extra query. Identical normalized chunks are deduplicated. Every fact must be an exact substring of the selected chunk, or the complete answer falls back.
 
-## Requirements and user stories
+Templates change presentation only, selected by a deterministic query hash. The factual sentences come from reviewed knowledge records and current source text. Multi-source answers require every mapped source. Document deletion or changed facts invalidate future answers; prior message snapshots remain.
 
-| ID | Requirement | Acceptance |
-|---|---|---|
-| FR-01 | Ask knowledge-base questions | Employee receives an answer or explicit fallback |
-| FR-02 | Retrieve document chunks | Persist actual chunk IDs and cosine scores |
-| FR-03 | Ground generation | Context-only prompt; reject invalid citation references |
-| FR-04 | Inspect sources | Citation opens title, section/page, and excerpt |
-| FR-05 | Abstain | Weak retrieval and unsupported generation return fallback |
-| FR-06 | Manage documents | Admin uploads PDF/TXT/Markdown, reindexes, removes |
-| FR-07 | Conversation history | History persists and is isolated by user |
-| FR-08 | Feedback | One editable rating per user and assistant message |
-| FR-09 | Analytics | Counts and source usage come from persisted events |
+## Persistence and access
 
-As an employee, I can verify a policy before acting, revisit my conversations, and flag unhelpful answers. As an administrator, I can curate knowledge and identify unanswered questions without viewing fabricated impact metrics.
+Migration 0003 adds intent_examples, conversation context, detected intent, diagnostics, and clarification choices. It does not rewrite the earlier corpus. Context records active intent/topic, recent documents, and recent query. MessageSource preserves actual title, page, section, chunk ID, excerpt and score.
 
-Non-functional requirements: environment-only secrets; hashed passwords; backend role and ownership checks; upload size/type/text validation; exact CORS origins; safe errors; responsive keyboard-accessible UI; traceable retrieval; bounded provider timeouts and request sizes. Public demo explicitly excludes confidential documents and production support guarantees.
+Anonymous visitors create a guest bearer session without registration; ownership checks isolate history/feedback. Tokens expire after eight hours and sessionStorage is scoped to the browser tab/session. Administrator credentials are separate; anonymous uploads are prohibited. The demo has process-local rate limits and should use one worker until distributed limits exist.
 
-## Architecture
+## Limits
 
-React + TypeScript + Vite + Tailwind + React Router → FastAPI modular monolith → SQLAlchemy → PostgreSQL 17 + pgvector. Alembic owns schema changes. Local FastEmbed provides embeddings; DeepSeek is configured for answer generation but awaits a real authenticated test. Docker Compose works locally; Vercel and Railway are deployment targets, not yet deployed.
-
-```mermaid
-flowchart LR
-  Employee --> SPA[React SPA / Vercel]
-  SPA --> API[FastAPI / Railway]
-  API --> DB[(PostgreSQL 17 + pgvector)]
-  API --> Embed[Local FastEmbed]
-  API --> Provider[DeepSeek when configured]
-  Admin --> Ingestion[Validate / Extract / Chunk]
-  Ingestion --> Provider
-  Ingestion --> DB
-```
-
-## Data model
-
-Users own conversations; conversations own messages. Documents own versioned chunks. Message sources record chunk identity, immutable evidence snapshots, and actual retrieval scores. Feedback references its author and assistant message with a uniqueness constraint. Documents record filename, title, MIME type, timestamps, indexing status, embedding model and content hash. Chunks record page, section, ordinal, text, embedding, and version. Deleting a document excludes it from future retrieval while historical evidence remains identifiable as a snapshot.
-
-## Retrieval and generation design
-
-1. Validate upload (maximum 10 MB); reject unsupported, encrypted/unreadable, empty, or image-only documents. No OCR.
-2. Extract PDF page text or UTF-8 TXT/Markdown; normalize whitespace while retaining sections/pages.
-3. Split within pages/sections using configurable 700-token windows and 100-token overlap. This balances context with focused citations; short sections remain short.
-4. Embed with `BAAI/bge-small-en-v1.5` (384 dimensions). Store model identity; do not mix incompatible embedding spaces.
-5. Embed question with the same model; cosine search approved active chunks; retrieve top 5. Start with exact search for the small demo corpus.
-6. Use configurable minimum cosine similarity 0.70 as an uncalibrated gate tuned on the 14-case synthetic set. Only qualifying chunks enter the prompt; two unsupported cases still pass this gate.
-7. Generate through configurable `deepseek-flash` once a key is supplied. Treat documents as untrusted data, not instructions; require structured claims and source identifiers. Live generation is unverified.
-8. Validate cited identifiers and quoted evidence against supplied chunks. Invalid or absent support causes fallback. Citation validity alone cannot prove semantic entailment; human evaluation remains necessary.
-9. Persist retrieval audit, displayed sources, outcome, model, and prompt version with the response.
-
-Similarity is not confidence or semantic certainty. UI displays evidence availability and retrieval scores, never invented confidence percentages. Follow-up questions must remain independently understandable in the initial MVP; conversation history is not an alternative policy source.
-
-## Provider compatibility and deployment decisions
-
-The default embedding provider is local FastEmbed, and real 384-dimensional vectors were stored and searched in pgvector. DeepSeek's official documentation lists `deepseek-flash` and its chat completion endpoint, but authenticated compatibility must still be tested. OpenRouter remains an optional adapter.
-
-- https://qdrant.github.io/fastembed/Getting%20Started/
-- https://api-docs.deepseek.com/guides/harness
-- https://api-docs.deepseek.com/api/create-chat-completion/
-
-The local pgvector image passed extension and migration checks. Railway support, resources, and cost must be verified before provisioning. If its pgvector setup is impractical, evaluate Supabase PostgreSQL with pgvector before changing architecture.
-
-## Quality and release gates
-
-Pytest covers extraction, chunking, validation, provider failures, citation rejection, fallback, persistence, ownership, and feedback. Real PostgreSQL checks verified migrations, vectors, and retrieval. Frontend gates are build, lint, behavior tests, and local browser verification. The current synthetic evaluation measures retrieval Hit@K and retrieval-gate abstention only; citation correctness and semantic answer support require actual generation and review.
-
-Release requires real embeddings, seeded documents, public API and frontend integration, CORS verification, source inspection, negative queries, admin authorization, and clean secret-free Git status. Until these pass, no live-completion claim is permitted.
-
-## Limitations and security
-
-Small synthetic corpus, no OCR, no enterprise IAM, no production SLA, no compliance certification. Prompt injection and semantic hallucination cannot be eliminated by prompts or citation checks. Admin-only ingestion limits exposure. Public usage needs bounded request rates and a provider spending limit. The demonstration is not a production IT support service.
+Narrow English synthetic corpus, curated source mappings, no arbitrary long-form generation, no guarantee of semantic correctness on unseen queries. Quote validity is measurable but is not independent entailment assessment. Hosting, database retention and operational costs still apply.

@@ -16,7 +16,7 @@ def test_unauthenticated_and_role_guards():
     app.dependency_overrides[get_db] = fake_db
     try:
         client = TestClient(app)
-        assert client.get("/documents").status_code == 401
+        assert client.get("/conversations").status_code == 401
         app.dependency_overrides[current_user] = lambda: User(id="employee", role="employee", email="demo@example.test")
         assert client.get("/analytics").status_code == 403
         assert client.post("/documents", files={"file": ("x.txt", b"policy")}).status_code == 403

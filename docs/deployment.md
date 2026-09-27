@@ -1,26 +1,25 @@
 # Deployment runbook
 
-Status: not deployed. Keep the repository local until real generation and the complete hosted system pass verification.
+Frontend target: Vercel. Backend/database target: isolated Railway project using PostgreSQL with pgvector. No GitHub push is required: deploy local source with the CLIs. No AI provider secrets are used.
 
-## Database and API on Railway
+## Backend
 
-1. Check the current Railway plan, image support, persistent volume, and RAM allowance. FastEmbed caches its model inside the API image; measure API memory before selecting a service size. Do not assume a no-cost deployment. If a pgvector-enabled Railway PostgreSQL image/volume is impractical, evaluate Supabase PostgreSQL with pgvector before changing the architecture.
-2. Provision PostgreSQL 17 with a pgvector-enabled image and persistent volume. Confirm CREATE EXTENSION IF NOT EXISTS vector, extension version, and a 384-dimensional vector round-trip before migration. Do not use destructive volume commands.
-3. Deploy the API from backend using its Dockerfile. Set private DATABASE_URL with postgresql+psycopg://, JWT_SECRET, DEEPSEEK_API_KEY, AI_PROVIDER=deepseek, and an exact JSON array in CORS_ORIGINS. Keep all keys server-side. API startup applies Alembic migrations; inspect logs and check /health and /docs.
-4. Use one worker while rate limiting is process-local. Configure DeepSeek account spending limits. Create demo users privately and ingest only the eight synthetic documents. Verify chunks, model identity, and source views in the hosted database.
+Build from backend using its Dockerfile/railway.toml. The model and tokenizer download during build; the resulting model cache was approximately 65 MB locally. Runtime uses local files only. Startup applies migrations, seeds bundled demo documents only for a new library, and idempotently indexes intents.
 
-## Frontend on Vercel
+Use a pgvector/pgvector:pg17 database service with a persistent /var/lib/postgresql/data volume, private networking, strong POSTGRES_PASSWORD, and DATABASE_URL in postgresql+psycopg format. Configure JWT_SECRET and exact CORS_ORIGINS. Never put these in frontend variables. Use one API worker. Verify extension and revision 0003 in the hosted database.
 
-1. After local DeepSeek E2E succeeds, import the repository with root frontend, build command npm run build, and output dist. Set VITE_API_URL to the Railway HTTPS API origin. Never put provider keys in VITE_ variables.
-2. Deploy a preview and add its exact origin to API CORS. Verify direct routes and refresh. Promote only after the full hosted acceptance tests pass.
+Before introducing a different database provider, verify whether the Railway pgvector image works. Supabase is only a fallback if this setup is impractical; no switch has been made.
 
-## Hosted acceptance
+## Cost feasibility
 
-- Real employee chat: supported, multi-source, unsupported, and low-relevance questions; inspect answer grounding and citation mapping.
-- History survives refresh and is isolated by account; feedback persists; admin analytics reflect events.
-- Document library and source excerpts work; admin upload/reindex/removal works with synthetic content.
-- Mobile layout and navigation work; direct routes refresh; CORS permits only configured origins; /docs loads.
-- No provider key appears in frontend bundles, logs, screenshots, or Git. Capture real screenshots from the deployed application only after these checks.
-- Run backend/frontend tests, browser regression, lint, build, migration check, secret scan, and Git status. Record exact results and hosted URLs in verification.md.
+Local warm API measured approximately 290 MiB RAM, PostgreSQL approximately 35 MiB. The complete cold in-process offline API verification took about 1.05 seconds locally; this is not a hosted cold-start SLA. Model download is a build-time cost, not a browser action.
 
-DeepSeek credentials have not yet been supplied, and neither hosting service is provisioned. No hosted behavior or portfolio screenshot is claimed.
+Railway account inspection found an active trial with approximately $4.83 credit and 28 days left. Current Railway documentation lists a Free allowance of $1/month and 0.5 GB RAM per service. Continuous operation of API and DB may exceed that credit; no indefinite-free hosting claim is made. Do not upgrade or add a paid plan without approval.
+
+Sources checked: https://docs.railway.com/pricing/plans and https://railway.com/pricing. Actual hosted usage must be measured after deployment.
+
+## Frontend and acceptance
+
+Deploy frontend with VITE_API_URL set to the public HTTPS API origin. Set exact production/preview origins in backend CORS. Test as a fresh anonymous visitor: supported and paraphrased questions, undocumented details, ambiguity, follow-up, multi-source citations, feedback, refresh/history, library, mobile, direct routes, console/API errors and docs. Verify admin controls separately and ensure no secrets in bundles.
+
+Capture actual deployed screenshots only after successful hosted tests. Run final tests/lint/build/migrations/secret scan/Git status. Keep GitHub unpublished until explicitly authorized.

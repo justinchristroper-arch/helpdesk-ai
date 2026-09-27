@@ -1,5 +1,7 @@
 .env
 .demo-credentials.json
+.deployment-secrets.json
+.railway/
 .env.*
 !.env.example
 .venv/

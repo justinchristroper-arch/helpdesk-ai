@@ -1,27 +1,17 @@
 # Verification record
 
-Local checkpoint, 2026-09-27. The repository remains local and the hosted system is not deployed. Results below distinguish retrieval from generated answers.
+Local architecture checkpoint, 2026-09-27. Hosted verification is still in progress; GitHub publication is not authorized.
 
-| Check | Measured result | Scope |
-|---|---|---|
-| Docker stack | Database and API started, stopped, and restarted with data retained | No volumes deleted |
-| PostgreSQL / pgvector | PostgreSQL 17.11, pgvector 0.8.6, Alembic revision 0002 | Real local database |
-| Document ingestion | 8 synthetic documents, 25 chunks, 384-dimensional vectors | Admin API to real database |
-| Vector storage and search | Fixture round-trip, cosine order, chunk text and metadata checked | backend/verify_storage.py; fixture rows removed |
-| Embedding provider | Real local FastEmbed BAAI/bge-small-en-v1.5; finite 384-dimensional vectors | No embedding mock or API key |
-| Retrieval evaluation | Hit@5 9/9 supported; after-gate hit 9/9; unsupported gate abstention 3/5 | Real embeddings and pgvector, threshold 0.70; see evaluation-retrieval.json |
-| Browser regression | 3 Edge tests passed | Real local auth, document library, analytics, refresh/direct route, mobile; AI-unconfigured safe error |
-| Backend tests | 28 passed, 1 opt-in skipped; separate real PostgreSQL test 1 passed | One Starlette/httpx deprecation warning |
-| Frontend tests / lint / build | 4 passed / passed / passed | Production bundle built successfully |
-| Migration consistency | Alembic current 0002 (head); no new upgrade operations | Existing project database |
-| Secret scan | 68 Git-visible files checked; no potential secret patterns found | Local ignored .env and demo credentials excluded |
-| API docs / health | /docs 200, /health 200 | ai_configured: false |
-| DeepSeek generation | Not run | Key not supplied; API compatibility is documentation-based only |
-| Answer support / citation quality | Not measured | Requires real generated answers and review |
-| Hosted end-to-end / screenshots | Not run | Vercel, Railway, and hosted database not provisioned |
+- Real PostgreSQL 17.11 and pgvector 0.8.6; Alembic 0003 at head, no pending model/schema operations.
+- Eight preserved synthetic documents and 25 source chunks; server-side FastEmbed creates 384-dimensional vectors.
+- Eighteen intents, 180 positive queries and 54 negative examples persist as 234 vectors. Repeated indexing reports zero new embeddings.
+- Backend: 51 tests passed with LIVE_SEMANTIC=1 and TEST_DATABASE_URL, including real matching, source-change fallback, vectors, context and multi-source evidence. One Starlette/httpx deprecation warning remains.
+- Frontend unit tests: four passed. Lint/build passed. Local Edge browser: four scenarios passed covering immediate anonymous chat, citations, feedback, context, history refresh, unsupported/ambiguous questions, multi-source, public library, mobile, admin upload/reindex/removal and analytics.
+- No-API integration: verify_offline.py removes API-key environment variables and blocks non-database socket connections before importing/loading the local model. Supported chat, citations, feedback, history, fallback and follow-up passed with zero external socket attempts. Latest cold complete test flow was 0.688 seconds locally.
+- Current 80-case regression: intent Top-1 53/53; Top-3 53/53; supported recall 53/53; returned-evidence Hit@3 53/53; unsupported rejection 21/21; ambiguity 6/6; citation validity 53/53 answered cases; verbatim evidence support 53/53; follow-up 6/6.
 
-The 14-question retrieval set contains 9 supported and 5 unsupported questions. Two unsupported questions pass the similarity gate, so the gate alone is insufficient for fallback. The 0.70 threshold was selected using this same small set; these scores do not estimate performance on unseen questions. Citation validity and semantic answer support remain unmeasured.
+All cases and metric definitions are in evaluation-semantic.json. These are inspected synthetic regression cases, not independent estimates of general language accuracy. The initial frozen-rule 16-case validation had two failures (VPN approval duration and a topic-only VPN query); its complete result is preserved in evaluation-initial-validation.json. Both behaviors were corrected. Verbatim support checks quote membership, not independent semantic entailment.
 
-The original Docker Desktop startup log showed failure removing its dockerInference Unix socket. Docker later created a fresh runtime socket and started; the underlying reason that the old socket could not be removed was not independently established. Separate host-port conflicts on 5432 and 5433 were resolved by configuring this project's database host port as 55432. No other project or Docker volume was changed.
+Original Docker startup failed removing a dockerInference socket. The deeper cause was not proven; the engine subsequently recovered. Host-port conflicts were resolved with project port 55432. No database volumes were deleted. Deployment builds use backend-only context to avoid an inaccessible unrelated root test cache on Windows.
 
-Pending release gates: authenticated DeepSeek request; supported, multi-source, unsupported, and low-relevance RAG answers; citation review; full evaluation; deployment; hosted browser and API regression; hosted screenshots; final checks and secret scan. Do not publish GitHub until those critical checks pass.
+Local screenshots are labelled local-semantic-*.png. They are not presented as hosted evidence. Hosted URLs, deployed screenshots, final secret scan and final Git checkpoint will be recorded after the actual deployment and tests.

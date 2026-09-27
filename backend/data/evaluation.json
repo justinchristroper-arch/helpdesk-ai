@@ -1,0 +1,584 @@
+{
+  "version": 1,
+  "note": "Synthetic benchmark. The first 64 cases were inspected during development and are not blind validation, including rows originally labelled heldout. The last 16 were added after freezing initial rules; their results are reported separately.",
+  "cases": [
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Which approvals and checks are needed to get a work VPN account?",
+      "intent": "vpn_request",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I have just joined and need the internal network when away from headquarters.",
+      "intent": "vpn_request",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "How should I report an error from the corporate VPN client?",
+      "intent": "vpn_connection",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My internet works fine but the office tunnel keeps refusing to connect.",
+      "intent": "vpn_connection",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Who can help when the authenticator on my lost phone is unavailable?",
+      "intent": "mfa_reset",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "The codes on my sign-in app aren't accepted any more.",
+      "intent": "mfa_reset",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What should happen after support verifies me for authenticator enrollment?",
+      "intent": "mfa_enrollment",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Identity checks are done. How do I finish setting up my replacement MFA app?",
+      "intent": "mfa_enrollment",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What action is required after liquid damage to a company laptop?",
+      "intent": "laptop_damage",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Coffee went over my work computer and I don't know whether to restart it.",
+      "intent": "laptop_damage",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "May an external repair shop service my company laptop without IT approval?",
+      "intent": "laptop_repair",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My work device needs repairs and I need a loaner to keep working.",
+      "intent": "laptop_repair",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What is needed to approve software missing from the company catalog?",
+      "intent": "software_approval",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I found an application that would help my job but it isn't in our approved catalog.",
+      "intent": "software_approval",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Does freeware outside the catalog require the usual approval?",
+      "intent": "software_restrictions",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "The download isn't from a trusted site but the software is free. Is that allowed?",
+      "intent": "software_restrictions",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Which details and approvals belong in a database access ticket?",
+      "intent": "database_request",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I need a role in the test database for my project and don't know who signs off.",
+      "intent": "database_request",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What conditions apply to write access in the production database?",
+      "intent": "database_conditions",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My approved database expiry date has passed and I still need access.",
+      "intent": "database_conditions",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What response target applies to a company-wide outage?",
+      "intent": "incident_p1",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "There is a confirmed active security incident affecting us right now.",
+      "intent": "incident_p1",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What are the response and restoration targets for P2?",
+      "intent": "incident_p2",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Nobody in our department can work and there is no alternative available.",
+      "intent": "incident_p2",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "How long is the initial response target when one employee has a workaround?",
+      "intent": "incident_p3",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My problem only affects me and I can work another way for now.",
+      "intent": "incident_p3",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "How should I proceed after failed self-service account recovery?",
+      "intent": "account_unlock",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My company login says locked out after repeated attempts.",
+      "intent": "account_unlock",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Should I preserve unfamiliar sign-in notifications after an account lockout?",
+      "intent": "account_security",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "An odd MFA request came in, and right after that my account was locked.",
+      "intent": "account_security",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Which IT checks should I finish before a day of remote working?",
+      "intent": "remote_prepare",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Tomorrow is my first day working from my house; what should I test now?",
+      "intent": "remote_prepare",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What precautions protect confidential information during remote working?",
+      "intent": "remote_safety",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I'm working remotely in a cafe and want to follow the screen and device rules.",
+      "intent": "remote_safety",
+      "outcome": "answered"
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What do the MFA guide and remote work checklist say when authentication breaks at home?",
+      "intent": "remote_mfa",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I work remotely and my phone's authenticator is unavailable. What are my next steps?",
+      "intent": "remote_mfa",
+      "outcome": "answered"
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is the laptop reimbursement limit?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is my manager's email address for VPN approval?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "How many weeks of parental leave can I take?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is the office Wi-Fi password?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "Can I turn off MFA permanently to avoid phone issues?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is the exact address of the VPN gateway?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "How much do I receive for home internet expenses?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Which brand of laptop will IT buy me?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Give me SQL to erase the production database.",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "What is the CEO's salary?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "When will my laptop repair be completed?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "What tax rules apply to remote employees?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Does HR permit permanent work from another country?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Can you write a poem about cats?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "What happens when my manager rejects VPN approval?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "I need access",
+      "intent": null,
+      "outcome": "clarification"
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "Can you help with access approval?",
+      "intent": null,
+      "outcome": "clarification"
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "VPN help",
+      "intent": null,
+      "outcome": "clarification"
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "I have an access problem",
+      "intent": null,
+      "outcome": "clarification"
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What are the requirements?",
+      "context": {
+        "active_intent": "vpn_request"
+      },
+      "intent": "vpn_request",
+      "outcome": "answered"
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "Who needs to approve it?",
+      "context": {
+        "active_intent": "database_request"
+      },
+      "intent": "database_request",
+      "outcome": "answered"
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What should I do next?",
+      "context": {
+        "active_intent": "mfa_reset"
+      },
+      "intent": "mfa_reset",
+      "outcome": "answered"
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "And what are the targets for that?",
+      "context": {
+        "active_intent": "incident_p2"
+      },
+      "intent": "incident_p2",
+      "outcome": "answered"
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What should I report about it?",
+      "context": {
+        "active_intent": "laptop_damage"
+      },
+      "intent": "laptop_damage",
+      "outcome": "answered"
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What should I check beforehand?",
+      "context": {
+        "active_intent": "remote_prepare"
+      },
+      "intent": "remote_prepare",
+      "outcome": "answered"
+    },
+    {
+      "category": "multi_source",
+      "split": "heldout",
+      "question": "My authenticator fails while I am working away from the office. I need both reset guidance and remote IT checks.",
+      "intent": "remote_mfa",
+      "outcome": "answered"
+    },
+    {
+      "category": "similar_wrong",
+      "split": "heldout",
+      "question": "My VPN works, but my account is locked. How can I unlock it?",
+      "intent": "account_unlock",
+      "outcome": "answered"
+    },
+    {
+      "category": "typo_short",
+      "split": "heldout",
+      "question": "vpm conection error",
+      "intent": "vpn_connection",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "My company computer took a hard fall and its casing is damaged. What should I report?",
+      "intent": "laptop_damage",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "I need the approvals for a database role and the details to put in the ticket.",
+      "intent": "database_request",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "Can a coworker borrow my production database login?",
+      "intent": "database_conditions",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "The IT catalog doesn't contain a program I need. How do I ask for it?",
+      "intent": "software_approval",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "For a P2 ticket, are restoration and initial response the same target?",
+      "intent": "incident_p2",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "I was sent an enrollment link after an MFA reset. What do I do with it?",
+      "intent": "mfa_enrollment",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "At home, my authenticator failed and I need remote-work guidance too.",
+      "intent": "remote_mfa",
+      "outcome": "answered"
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "Is there a guaranteed fix time for a critical incident?",
+      "intent": "incident_p1",
+      "outcome": "answered"
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Is a home office chair reimbursable?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Who signs my parental leave form?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Can you tell me tomorrow's weather?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "What is the admin password for the database?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "How many hours does VPN approval take?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Can I claim money for a stolen personal laptop?",
+      "intent": null,
+      "outcome": "fallback"
+    },
+    {
+      "category": "ambiguity_validation",
+      "split": "validation",
+      "question": "Please help me get access",
+      "intent": null,
+      "outcome": "clarification"
+    },
+    {
+      "category": "ambiguity_validation",
+      "split": "validation",
+      "question": "vpn",
+      "intent": null,
+      "outcome": "clarification"
+    }
+  ]
+}

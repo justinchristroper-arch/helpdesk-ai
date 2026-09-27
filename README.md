@@ -1,97 +1,49 @@
 # HelpDesk AI
 
-**Internal IT Knowledge Assistant · Portfolio Project 4**
+**Evidence-First IT Knowledge Assistant — Portfolio Project 4**
 
-A grounding-first knowledge assistant for synthetic internal IT policies. React provides a source-aware chat workspace; FastAPI retrieves PostgreSQL/pgvector chunks. Local FastEmbed creates embeddings; DeepSeek is configured for evidence-backed generation when an API key is available. Unsupported questions are designed to return an explicit fallback.
+HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Runtime chat requires no external AI API and no AI key. It is not a general-purpose generative chatbot.
 
-**Status: implementation in progress, not publicly deployed or end-to-end verified.** Live demo and API URLs are not available yet. This repository does not claim measured accuracy or business savings.
+Status: local no-API architecture verified; hosted verification is tracked in [verification](docs/verification.md). Repository publication is not authorized.
 
-![Desktop workspace](screenshots/desktop.png)
+## Why this architecture
 
-## Why this project
+For a bounded IT knowledge base, approved facts and procedures can be composed without external generation. This provides auditable answers and zero external AI inference charges. Questions remain on the application/database infrastructure during inference. Hosting can still incur costs; this is a privacy-conscious demo, not a privacy certification or claim of measured company savings.
 
-Employees often search scattered documentation or ask IT the same questions. HelpDesk AI demonstrates a different workflow: ask → retrieve approved documentation → answer with inspectable evidence → verify the source. It complements screening, BI, and process automation portfolio projects with practical knowledge retrieval and AI traceability.
+## How it works
 
-## Features implemented
+1. Normalize the question and resolve limited follow-up context.
+2. Embed on the server using cached BAAI/bge-small-en-v1.5 (384 dimensions).
+3. Match persistent examples for 18 intents (180 positive queries, 54 contrastive/unsupported negatives).
+4. Apply explainable similarity, scope, specificity, negative-example and ambiguity gates.
+5. Retrieve at most three deduplicated pgvector evidence chunks from the mapped active documents.
+6. Verify every approved factual sentence against its actual source text.
+7. Compose steps, checklists, policies or SLA guidance with real source metadata.
 
-- React chat workspace with examples, conversation history, source panel, and feedback.
-- PDF/TXT/Markdown extraction, validation, token chunking, and embedding adapter.
-- PostgreSQL 17 + pgvector schema, Alembic migration, cosine retrieval, and audit snapshots.
-- DeepSeek generation adapter with context-only prompting, source ID validation, and exact-quote validation; OpenRouter remains an optional adapter. Live generation has not yet been tested.
-- Document library, administrator upload/removal/reindexing, and persisted usage analytics.
-- JWT authentication, Argon2 password hashes, role/ownership checks, exact CORS origins, provider timeouts, and basic process-local request limits.
-- Eight clearly labeled synthetic policies, a 14-question measured retrieval set, and a separate full RAG evaluation runner awaiting a generation key.
-
-Implementation does not mean every feature has passed integration testing. See [verification status](docs/verification.md).
-
-## Architecture and RAG
-
-```mermaid
-flowchart LR
-  A[React / Vite / TypeScript] --> B[FastAPI modular monolith]
-  B --> C[(PostgreSQL 17 / pgvector)]
-  B --> D[Local FastEmbed embeddings]
-  B --> E[DeepSeek generation when configured]
-```
-
-```mermaid
-flowchart TD
-  U[Admin PDF / TXT / Markdown] --> V[Validate and extract]
-  V --> K[700-token chunks / 100-token overlap]
-  K --> EMB[Embed and persist]
-  Q[Employee question] --> QE[Query embedding]
-  QE --> R[Cosine top-5 retrieval]
-  EMB --> R
-  R --> G{Evidence above threshold?}
-  G -- No --> F[Explicit fallback]
-  G -- Yes --> L[Context-only generation]
-  L --> X{Valid source IDs and exact evidence quotes?}
-  X -- No --> F
-  X -- Yes --> A[Answer and source snapshots]
-```
-
-Default embedding model is `BAAI/bge-small-en-v1.5` (384 dimensions), tested locally with real vectors. Default generation model is `deepseek-flash`; no authenticated request has been made yet. Models are environment-configurable. Changing the embedding model requires reindexing; the database column can store different dimensions, but vectors of different sizes cannot be compared. The current 0.70 similarity threshold was tuned on this small synthetic set and is not calibrated confidence.
+The FAQ path skips broader retrieval when the intent score is very high; it still queries and verifies authoritative evidence. Multi-source MFA/remote-work answers cite both documents. Unknown topics and undocumented details fall back; underspecified topics clarify.
 
 ## Local setup
 
-Prerequisites: Python 3.12, Node 22+, and Docker with a working Linux engine. A DeepSeek API key is required to test generated answers; document ingestion and retrieval work locally without one.
+Copy .env.example to .env and set a strong database password, matching DATABASE_URL and random JWT_SECRET. No AI key is needed. Run docker compose up --build -d. First startup applies Alembic 0003, seeds the eight bundled synthetic documents into an empty library, and indexes intent examples. Existing libraries are preserved.
 
-1. Copy `.env.example` to `.env`. Set a random database password, matching `DATABASE_URL`, and a random JWT secret of at least 32 characters. Set `DEEPSEEK_API_KEY` only when available. Never commit this file. Use URL-safe database credentials or URL-encode the password in database URLs.
-2. Run `docker compose up -d db`. The database uses host port 55432 by default to avoid conflicts with other local projects. Then run `docker compose up --build api`. The API applies Alembic migrations at startup and listens at `http://localhost:8000`.
-3. Create accounts explicitly: `docker compose exec api python -m app.manage create-user --email admin@example.test --role admin`, then repeat with `--role employee` for the demo user. Passwords are prompted privately; minimum 12 characters.
-4. In `frontend`, run `npm ci` and `npm run dev`. The default API URL is `http://localhost:8000`. Set `VITE_API_URL` in `frontend/.env` if different.
-5. Sign in as administrator and upload the Markdown files in `sample-data`. Alternatively install the backend requirements locally and run `python backend/seed.py` from the root with the API running.
-6. Ask an example question, inspect citations, reload history, submit feedback, and check analytics.
+Run npm ci and npm run dev inside frontend. Open http://localhost:5173 and ask a question immediately. Guest sessions are isolated and stored in sessionStorage. Use the existing management command for an admin account: docker compose exec api python -m app.manage create-user --email admin@example.test --role admin.
 
-For backend development without a container: create a virtual environment, install `backend/requirements.txt`, set environment variables (or copy the local `.env` into `backend/.env`), then from `backend` run `alembic upgrade head` and `uvicorn app.main:app --reload`.
+The Docker image downloads the embedding model and tokenizer at build time. Runtime FastEmbed uses local_files_only and HF_HUB_OFFLINE. The browser downloads only the web app, never the embedding model.
 
-## Testing
+## Verification
 
-From `backend`: `python -m pytest -q`. Set `TEST_DATABASE_URL` to an isolated PostgreSQL database with extension permissions to enable the vector persistence test. It creates a transaction-scoped test schema and rolls it back; it does not drop the public schema.
+- Backend: python -m pytest -q from backend; real seeded checks require LIVE_SEMANTIC=1 and TEST_DATABASE_URL.
+- Frontend: npm test, npm run lint, npm run build.
+- Browser: npm run test:e2e with local API/frontend running and ignored .demo-credentials.json for the admin test.
+- Real no-API proof: docker compose exec -T api python verify_offline.py.
+- Evaluation: docker compose exec -T api python -m app.evaluate.
 
-From `frontend`: `npm run build`, `npm run lint`, and `npm test`. With local API and frontend running plus ignored `.demo-credentials.json`, run `npm run test:e2e` for Edge browser regression.
+[Evaluation results](docs/evaluation-semantic.json) record all cases and definitions. The benchmark was inspected during development and is not an independent generalization estimate. Initial validation failures are preserved separately.
 
-The measured retrieval-only results are in [evaluation-retrieval.json](docs/evaluation-retrieval.json). Full RAG evaluation requires a DeepSeek key; `backend/evaluate.py` must not be represented as a completed run until real generation and manual answer review are done. Test fixtures that replace provider responses are unit tests, not AI quality evaluation.
+## Maintenance and trade-offs
 
-## Data model
+See [dataset maintenance](docs/dataset-maintenance.md), [architecture](docs/design.md), [deployment](docs/deployment.md), [verification](docs/verification.md), and [case study](docs/case-study.md).
 
-`users` → `conversations` → `messages` → `message_sources`; `documents` → `document_chunks`; `feedback` links users and assistant messages. Historical source snapshots preserve evidence after document deletion. Models and prompt versions are stored for assistant messages. Every retrieved match is audited; only sources actually cited are exposed as answer citations.
+Semantic coverage depends on curated examples and approved fact mappings. Uploaded documents become searchable in the library, but answer coverage requires a reviewed intent mapping; arbitrary uploads do not silently become authoritative answer templates. Less flexible than an LLM, English-focused, no OCR, no enterprise identity/retention workflow, one worker with process-local limits. Exact quotation proves source membership, not that the matcher understood every possible question.
 
-## Public demo safety and limitations
-
-Portfolio demonstration only. Synthetic documents only. Do not upload confidential information. No enterprise security guarantee, compliance certification, production SLA, or real IT support service.
-
-- Exact quotes and valid citations do not prove semantic entailment. The model can still misunderstand a source.
-- No OCR, enterprise IAM, background ingestion queue, or automated policy approval workflow.
-- Administrators are responsible for approved content. Uploading makes a document available immediately.
-- Ingestion is synchronous and bounded. Rate limits are process-local; deploy one worker until shared limits exist.
-- JWT sessions last eight hours and are stored in session storage. No refresh/revocation or account recovery flow.
-- Follow-up questions should stand alone; previous chat content is not used as policy evidence.
-- Uploads are normalized into indexed text; the original binary is not archived. Source views display the indexed text.
-- Reindex recomputes embeddings for current chunks; it does not reparse the original document.
-- Public demo users sharing one employee account also share that account's conversation history. Never use personal or confidential data.
-- Live generation evaluation and hosted end-to-end testing remain release gates. The current threshold has only been checked on the small synthetic set.
-
-## Deployment and portfolio
-
-See [deployment runbook](docs/deployment.md), [business and system design](docs/design.md), [case study and interview notes](docs/case-study.md), and [verification status](docs/verification.md). The existing portfolio repository is not modified.
+Historical citations remain snapshots after a source is removed. Synthetic policy corpus only; do not enter confidential data. Screenshots labelled local are local verification evidence, not deployed portfolio screenshots.

@@ -1,0 +1,3539 @@
+{
+  "measured_at": "2026-09-26T18:28:13.211440+00:00",
+  "dataset_hash": "f05db51d29dc60d09274a3194d3c2b1b7b986044f71d3745d5ef53044dd0e78b",
+  "definitions": {
+    "intent_top1": "First intent after semantic ranking and explicit scope/specificity rules matches expected intent, before evidence gate.",
+    "supported_recall": "Expected supported cases answered with expected intent.",
+    "retrieval_hit_at_3": "Supported cases with at least one expected document among at most three returned evidence chunks; fallback counts as a miss.",
+    "citation_validity": "Answered cases whose citations identify real document/chunk pairs.",
+    "verbatim_evidence_support": "Answered cases where every composed fact is an exact substring of its cited chunk; this is not independent semantic entailment assessment.",
+    "followup_resolution": "Follow-ups use stored topic and return expected intent."
+  },
+  "benchmark_note": "All 80 cases are now inspected regression cases, not blind accuracy estimates. Initial frozen-rule results for the final 16, including two failures, are preserved in evaluation-initial-validation.json.",
+  "metrics": {
+    "intent_top1": {
+      "passed": 53,
+      "total": 53,
+      "rate": 1.0
+    },
+    "intent_top3": {
+      "passed": 53,
+      "total": 53,
+      "rate": 1.0
+    },
+    "supported_recall": {
+      "passed": 53,
+      "total": 53,
+      "rate": 1.0
+    },
+    "retrieval_hit_at_3": {
+      "passed": 53,
+      "total": 53,
+      "rate": 1.0
+    },
+    "unsupported_rejection": {
+      "passed": 21,
+      "total": 21,
+      "rate": 1.0
+    },
+    "ambiguity_detection": {
+      "passed": 6,
+      "total": 6,
+      "rate": 1.0
+    },
+    "citation_validity": {
+      "passed": 53,
+      "total": 53,
+      "rate": 1.0
+    },
+    "verbatim_evidence_support": {
+      "passed": 53,
+      "total": 53,
+      "rate": 1.0
+    },
+    "followup_resolution": {
+      "passed": 6,
+      "total": 6,
+      "rate": 1.0
+    }
+  },
+  "validation_metrics": {
+    "intent_top1": {
+      "passed": 8,
+      "total": 8,
+      "rate": 1.0
+    },
+    "intent_top3": {
+      "passed": 8,
+      "total": 8,
+      "rate": 1.0
+    },
+    "supported_recall": {
+      "passed": 8,
+      "total": 8,
+      "rate": 1.0
+    },
+    "retrieval_hit_at_3": {
+      "passed": 8,
+      "total": 8,
+      "rate": 1.0
+    },
+    "unsupported_rejection": {
+      "passed": 6,
+      "total": 6,
+      "rate": 1.0
+    },
+    "ambiguity_detection": {
+      "passed": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "citation_validity": {
+      "passed": 8,
+      "total": 8,
+      "rate": 1.0
+    },
+    "verbatim_evidence_support": {
+      "passed": 8,
+      "total": 8,
+      "rate": 1.0
+    },
+    "followup_resolution": {
+      "passed": 0,
+      "total": 0,
+      "rate": null
+    }
+  },
+  "cases": [
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Which approvals and checks are needed to get a work VPN account?",
+      "intent": "vpn_request",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "vpn_request",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nRequest VPN access\n1. Submit an Access Request ticket in the demo IT service portal. [1]\n2. Select VPN access, state the business reason, and attach your manager's approval. [1]\n3. IT verifies your employment status and managed laptop before granting access. [1]\n4. MFA enrollment is required before first connection. [1]",
+      "milliseconds": 663.03,
+      "diagnostics": {
+        "resolved_query": "which approvals and checks are needed to get a work vpn account?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.863056
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.754016
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.736559
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8630561828613281,
+        "margin": 0.10903983527275496,
+        "negative_score": 0.811549961566925,
+        "path": "semantic",
+        "retrieved_documents": [
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I have just joined and need the internal network when away from headquarters.",
+      "intent": "vpn_request",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "vpn_request",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nRequest VPN access\n1. Submit an Access Request ticket in the demo IT service portal. [1]\n2. Select VPN access, state the business reason, and attach your manager's approval. [1]\n3. IT verifies your employment status and managed laptop before granting access. [1]\n4. MFA enrollment is required before first connection. [1]",
+      "milliseconds": 15.74,
+      "diagnostics": {
+        "resolved_query": "i have just joined and need the internal network when away from headquarters.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.81898
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.729156
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.702479
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8189802277696011,
+        "margin": 0.08982461155506316,
+        "negative_score": 0.6946054283019657,
+        "path": "semantic",
+        "retrieved_documents": [
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "How should I report an error from the corporate VPN client?",
+      "intent": "vpn_connection",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "vpn_connection",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nConnection problems\n1. Confirm your internet connection, open the approved VPN client, and authenticate with your company account and MFA. [1]\n2. If the connection fails, record the error message and contact IT support. [1]\n3. Never share passwords or MFA codes. [1]",
+      "milliseconds": 14.96,
+      "diagnostics": {
+        "resolved_query": "how should i report an error from the corporate vpn client?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_connection",
+            "score": 0.837503
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.765501
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.725709
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8375027276573954,
+        "margin": 0.07200134769065958,
+        "negative_score": 0.7380455732345581,
+        "path": "semantic",
+        "retrieved_documents": [
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My internet works fine but the office tunnel keeps refusing to connect.",
+      "intent": "vpn_connection",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "vpn_connection",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nConnection problems\n1. Confirm your internet connection, open the approved VPN client, and authenticate with your company account and MFA. [1]\n2. If the connection fails, record the error message and contact IT support. [1]\n3. Never share passwords or MFA codes. [1]",
+      "milliseconds": 15.19,
+      "diagnostics": {
+        "resolved_query": "my internet works fine but the office tunnel keeps refusing to connect.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_connection",
+            "score": 0.769183
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.681929
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.680807
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7691829663028115,
+        "margin": 0.08725385482209858,
+        "negative_score": 0.6387964487075806,
+        "path": "semantic",
+        "retrieved_documents": [
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Who can help when the authenticator on my lost phone is unavailable?",
+      "intent": "mfa_reset",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "mfa_reset",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]",
+      "milliseconds": 14.73,
+      "diagnostics": {
+        "resolved_query": "who can help when the authenticator on my lost phone is unavailable?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "mfa_reset",
+            "score": 0.831124
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.780535
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.709145
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8311243653297424,
+        "margin": 0.050589607985897955,
+        "negative_score": 0.7008742868379196,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "The codes on my sign-in app aren't accepted any more.",
+      "intent": "mfa_reset",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "mfa_reset",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]",
+      "milliseconds": 15.59,
+      "diagnostics": {
+        "resolved_query": "the codes on my sign-in app aren't accepted any more.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "mfa_reset",
+            "score": 0.827817
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.740403
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.728039
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.827817440032959,
+        "margin": 0.08741450309753418,
+        "negative_score": 0.6650795540166179,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What should happen after support verifies me for authenticator enrollment?",
+      "intent": "mfa_enrollment",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "mfa_enrollment",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nRe-enrollment\n1. After identity verification, IT issues a time-limited enrollment link through the registered recovery channel. [1]\n2. Register the new authenticator and complete a test sign-in. [1]\n3. Never send support a password, recovery code, or one-time MFA code. [1]",
+      "milliseconds": 14.62,
+      "diagnostics": {
+        "resolved_query": "what should happen after support verifies me for authenticator enrollment?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.846558
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.785888
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.780061
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8465577960014343,
+        "margin": 0.06066972017288208,
+        "negative_score": 0.6770506693690628,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Identity checks are done. How do I finish setting up my replacement MFA app?",
+      "intent": "mfa_enrollment",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "mfa_enrollment",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nRe-enrollment\n1. After identity verification, IT issues a time-limited enrollment link through the registered recovery channel. [1]\n2. Register the new authenticator and complete a test sign-in. [1]\n3. Never send support a password, recovery code, or one-time MFA code. [1]",
+      "milliseconds": 15.31,
+      "diagnostics": {
+        "resolved_query": "identity checks are done. how do i finish setting up my replacement mfa app?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.896067
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.849557
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.746452
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8960665669500743,
+        "margin": 0.04650935498134168,
+        "negative_score": 0.7620010148882594,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What action is required after liquid damage to a company laptop?",
+      "intent": "laptop_damage",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "laptop_damage",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nImmediate action\n1. Stop using a damaged company laptop. [1]\n2. For liquid spills or visible electrical damage, disconnect power if safe and do not switch the device back on. [1]\n3. Report the incident to IT support with the asset tag, description, and photos if safe to obtain. [1]\n4. Do not attempt repairs yourself. [1]",
+      "milliseconds": 14.2,
+      "diagnostics": {
+        "resolved_query": "what action is required after liquid damage to a company laptop?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_damage",
+            "score": 0.852457
+          },
+          {
+            "intent": "laptop_repair",
+            "score": 0.808941
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.664646
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8524572341169591,
+        "margin": 0.043515989037918534,
+        "negative_score": 0.6224380135536194,
+        "path": "semantic",
+        "retrieved_documents": [
+          "laptop-damage-procedure.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Coffee went over my work computer and I don't know whether to restart it.",
+      "intent": "laptop_damage",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "laptop_damage",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nImmediate action\n1. Stop using a damaged company laptop. [1]\n2. For liquid spills or visible electrical damage, disconnect power if safe and do not switch the device back on. [1]\n3. Report the incident to IT support with the asset tag, description, and photos if safe to obtain. [1]\n4. Do not attempt repairs yourself. [1]",
+      "milliseconds": 16.66,
+      "diagnostics": {
+        "resolved_query": "coffee went over my work computer and i don't know whether to restart it.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_damage",
+            "score": 0.728153
+          },
+          {
+            "intent": "laptop_repair",
+            "score": 0.691802
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.651063
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7281527085213252,
+        "margin": 0.036350743284656484,
+        "negative_score": 0.5832480440587982,
+        "path": "semantic",
+        "retrieved_documents": [
+          "laptop-damage-procedure.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "May an external repair shop service my company laptop without IT approval?",
+      "intent": "laptop_repair",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "laptop_repair",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nRepair and replacement\n\u2022 IT assesses the device and arranges approved repair or replacement. [1]\n\u2022 Your manager approves a temporary loan device when business continuity requires it. [1]\n\u2022 Do not ship equipment or use a third-party repair shop without IT approval. [1]",
+      "milliseconds": 15.28,
+      "diagnostics": {
+        "resolved_query": "may an external repair shop service my company laptop without it approval?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_repair",
+            "score": 0.889158
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.777038
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.702573
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8891582754003492,
+        "margin": 0.11212063169838893,
+        "negative_score": 0.7011979400397588,
+        "path": "semantic",
+        "retrieved_documents": [
+          "laptop-damage-procedure.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My work device needs repairs and I need a loaner to keep working.",
+      "intent": "laptop_repair",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "laptop_repair",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nRepair and replacement\n\u2022 IT assesses the device and arranges approved repair or replacement. [1]\n\u2022 Your manager approves a temporary loan device when business continuity requires it. [1]\n\u2022 Do not ship equipment or use a third-party repair shop without IT approval. [1]",
+      "milliseconds": 14.44,
+      "diagnostics": {
+        "resolved_query": "my work device needs repairs and i need a loaner to keep working.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_repair",
+            "score": 0.744302
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.715302
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.691516
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7443015131770676,
+        "margin": 0.028999684512634127,
+        "negative_score": 0.6664860645822337,
+        "path": "semantic",
+        "retrieved_documents": [
+          "laptop-damage-procedure.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What is needed to approve software missing from the company catalog?",
+      "intent": "software_approval",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "software_approval",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nApproval required\n\u2022 Employees may install software from the approved company software catalog. [1]\n\u2022 Software outside the catalog requires an IT service request, a business justification, and manager approval. [1]\n\u2022 IT reviews licensing and security before installation. [1]\n\u2022 Employees must not bypass device management or use personal administrator accounts. [1]",
+      "milliseconds": 14.38,
+      "diagnostics": {
+        "resolved_query": "what is needed to approve software missing from the company catalog?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "software_approval",
+            "score": 0.849779
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.788666
+          },
+          {
+            "intent": "database_request",
+            "score": 0.764337
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8497787281673014,
+        "margin": 0.06111276527248921,
+        "negative_score": 0.723787383807469,
+        "path": "semantic",
+        "retrieved_documents": [
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I found an application that would help my job but it isn't in our approved catalog.",
+      "intent": "software_approval",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "software_approval",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nApproval required\n\u2022 Employees may install software from the approved company software catalog. [1]\n\u2022 Software outside the catalog requires an IT service request, a business justification, and manager approval. [1]\n\u2022 IT reviews licensing and security before installation. [1]\n\u2022 Employees must not bypass device management or use personal administrator accounts. [1]",
+      "milliseconds": 17.19,
+      "diagnostics": {
+        "resolved_query": "i found an application that would help my job but it isn't in our approved catalog.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "software_approval",
+            "score": 0.80687
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.707767
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.694026
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8068695664405823,
+        "margin": 0.09910265482166647,
+        "negative_score": 0.5948684698500115,
+        "path": "semantic",
+        "retrieved_documents": [
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Does freeware outside the catalog require the usual approval?",
+      "intent": "software_restrictions",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "software_restrictions",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nProhibited actions\n\u2022 Unlicensed software and downloads from unverified sources are prohibited. [1]\n\u2022 A free license does not remove the approval requirement for software outside the catalog. [1]",
+      "milliseconds": 13.62,
+      "diagnostics": {
+        "resolved_query": "does freeware outside the catalog require the usual approval?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "software_restrictions",
+            "score": 0.845732
+          },
+          {
+            "intent": "software_approval",
+            "score": 0.815158
+          },
+          {
+            "intent": "database_request",
+            "score": 0.731538
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8457316252153279,
+        "margin": 0.03057320947111619,
+        "negative_score": 0.6957008657277158,
+        "path": "semantic",
+        "retrieved_documents": [
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "The download isn't from a trusted site but the software is free. Is that allowed?",
+      "intent": "software_restrictions",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "software_restrictions",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nProhibited actions\n\u2022 Unlicensed software and downloads from unverified sources are prohibited. [1]\n\u2022 A free license does not remove the approval requirement for software outside the catalog. [1]",
+      "milliseconds": 15.53,
+      "diagnostics": {
+        "resolved_query": "the download isn't from a trusted site but the software is free. is that allowed?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "software_restrictions",
+            "score": 0.878484
+          },
+          {
+            "intent": "software_approval",
+            "score": 0.80751
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.668986
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8784840630581432,
+        "margin": 0.07097435420598719,
+        "negative_score": 0.7024854840329591,
+        "path": "semantic",
+        "retrieved_documents": [
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Which details and approvals belong in a database access ticket?",
+      "intent": "database_request",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "database_request",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nRequest process\n1. Submit a database access ticket specifying the database, environment, required role, business purpose, and requested expiry date. [1]\n2. Attach approvals from your manager and the data owner. [1]\n3. The database administrator provisions the least privilege necessary after both approvals. [1]",
+      "milliseconds": 14.64,
+      "diagnostics": {
+        "resolved_query": "which details and approvals belong in a database access ticket?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.842303
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.73602
+          },
+          {
+            "intent": "software_approval",
+            "score": 0.688203
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8423032760620117,
+        "margin": 0.10628292751251578,
+        "negative_score": 0.6791784572111653,
+        "path": "semantic",
+        "retrieved_documents": [
+          "database-access-sop.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I need a role in the test database for my project and don't know who signs off.",
+      "intent": "database_request",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "database_request",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nRequest process\n1. Submit a database access ticket specifying the database, environment, required role, business purpose, and requested expiry date. [1]\n2. Attach approvals from your manager and the data owner. [1]\n3. The database administrator provisions the least privilege necessary after both approvals. [1]",
+      "milliseconds": 16.92,
+      "diagnostics": {
+        "resolved_query": "i need a role in the test database for my project and don't know who signs off.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.811856
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.727777
+          },
+          {
+            "intent": "software_approval",
+            "score": 0.711155
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8118564486503601,
+        "margin": 0.08407900548644498,
+        "negative_score": 0.7111775106893499,
+        "path": "semantic",
+        "retrieved_documents": [
+          "database-access-sop.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What conditions apply to write access in the production database?",
+      "intent": "database_conditions",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "database_conditions",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nAccess conditions\n\u2022 Production access requires MFA and an approved managed device. [1]\n\u2022 Read-only access is the default. [1]\n\u2022 Write access requires an explicit data-owner justification. [1]\n\u2022 Access expires on the approved date and must be requested again if still needed. [1]\n\u2022 Never share database credentials. [1]",
+      "milliseconds": 13.11,
+      "diagnostics": {
+        "resolved_query": "what conditions apply to write access in the production database?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_conditions",
+            "score": 0.879258
+          },
+          {
+            "intent": "database_request",
+            "score": 0.77182
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.698329
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8792583608406298,
+        "margin": 0.10743793485338615,
+        "negative_score": 0.6966445446014404,
+        "path": "semantic",
+        "retrieved_documents": [
+          "database-access-sop.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My approved database expiry date has passed and I still need access.",
+      "intent": "database_conditions",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "database_conditions",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nAccess conditions\n\u2022 Production access requires MFA and an approved managed device. [1]\n\u2022 Read-only access is the default. [1]\n\u2022 Write access requires an explicit data-owner justification. [1]\n\u2022 Access expires on the approved date and must be requested again if still needed. [1]\n\u2022 Never share database credentials. [1]",
+      "milliseconds": 14.14,
+      "diagnostics": {
+        "resolved_query": "my approved database expiry date has passed and i still need access.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_conditions",
+            "score": 0.868513
+          },
+          {
+            "intent": "database_request",
+            "score": 0.800812
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.706731
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8685125967416945,
+        "margin": 0.06770026885569891,
+        "negative_score": 0.8147360329251303,
+        "path": "semantic",
+        "retrieved_documents": [
+          "database-access-sop.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What response target applies to a company-wide outage?",
+      "intent": "incident_p1",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p1",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nCritical priority P1\n\u2022 A critical P1 incident is a company-wide outage or confirmed active security incident. [1]\n\u2022 Contact the emergency IT support channel immediately. [1]\n\u2022 The initial response target is 15 minutes, monitored around the clock. [1]\n\u2022 This synthetic policy does not define a guaranteed resolution time. [1]",
+      "milliseconds": 13.63,
+      "diagnostics": {
+        "resolved_query": "what response target applies to a company-wide outage?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p1",
+            "score": 0.817429
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.744662
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.74383
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8174293528455124,
+        "margin": 0.07276686001446198,
+        "negative_score": 0.571085035800938,
+        "path": "semantic",
+        "retrieved_documents": [
+          "incident-priority-sla.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "There is a confirmed active security incident affecting us right now.",
+      "intent": "incident_p1",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p1",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nCritical priority P1\n\u2022 A critical P1 incident is a company-wide outage or confirmed active security incident. [1]\n\u2022 Contact the emergency IT support channel immediately. [1]\n\u2022 The initial response target is 15 minutes, monitored around the clock. [1]\n\u2022 This synthetic policy does not define a guaranteed resolution time. [1]",
+      "milliseconds": 11.91,
+      "diagnostics": {
+        "resolved_query": "there is a confirmed active security incident affecting us right now.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p1",
+            "score": 0.948235
+          },
+          {
+            "intent": "account_security",
+            "score": 0.796003
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.687689
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9482349753379822,
+        "margin": 0.15223227775072457,
+        "negative_score": 0.6240405068373389,
+        "path": "faq"
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What are the response and restoration targets for P2?",
+      "intent": "incident_p2",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p2",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nHigh priority P2\n\u2022 A high-priority P2 incident significantly affects a department and has no reasonable workaround. [1]\n\u2022 The initial response target is 1 business hour. [1]\n\u2022 The restoration target is 8 business hours. [1]\n\u2022 These are separate targets, not guaranteed resolution times. [1]\n\u2022 Business hours are Monday to Friday, 09:00 to 17:00 local company time, excluding company holidays. [1]",
+      "milliseconds": 12.07,
+      "diagnostics": {
+        "resolved_query": "what are the response and restoration targets for p2?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p2",
+            "score": 0.958543
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.793449
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.721526
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9585432434950343,
+        "margin": 0.16509416233325036,
+        "negative_score": 0.7494175210768753,
+        "path": "faq"
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Nobody in our department can work and there is no alternative available.",
+      "intent": "incident_p2",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p2",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nHigh priority P2\n\u2022 A high-priority P2 incident significantly affects a department and has no reasonable workaround. [1]\n\u2022 The initial response target is 1 business hour. [1]\n\u2022 The restoration target is 8 business hours. [1]\n\u2022 These are separate targets, not guaranteed resolution times. [1]\n\u2022 Business hours are Monday to Friday, 09:00 to 17:00 local company time, excluding company holidays. [1]",
+      "milliseconds": 13.91,
+      "diagnostics": {
+        "resolved_query": "nobody in our department can work and there is no alternative available.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p2",
+            "score": 0.793346
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.576525
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.573092
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7933463454246521,
+        "margin": 0.21682157656402667,
+        "negative_score": 0.504098504537434,
+        "path": "semantic",
+        "retrieved_documents": [
+          "incident-priority-sla.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "How long is the initial response target when one employee has a workaround?",
+      "intent": "incident_p3",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p3",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nNormal priority P3\n\u2022 A normal-priority P3 incident affects an individual with a workable alternative. [1]\n\u2022 The initial response target is 1 business day. [1]\n\u2022 IT prioritizes restoration according to impact and available workarounds. [1]",
+      "milliseconds": 14.06,
+      "diagnostics": {
+        "resolved_query": "how long is the initial response target when one employee has a workaround?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p3",
+            "score": 0.74333
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.793125
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.747881
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7433295998972906,
+        "margin": -0.049795361545953876,
+        "negative_score": 0.6705143451690674,
+        "path": "semantic",
+        "retrieved_documents": [
+          "incident-priority-sla.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My problem only affects me and I can work another way for now.",
+      "intent": "incident_p3",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p3",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nNormal priority P3\n\u2022 A normal-priority P3 incident affects an individual with a workable alternative. [1]\n\u2022 The initial response target is 1 business day. [1]\n\u2022 IT prioritizes restoration according to impact and available workarounds. [1]",
+      "milliseconds": 14.71,
+      "diagnostics": {
+        "resolved_query": "my problem only affects me and i can work another way for now.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p3",
+            "score": 0.91574
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.578158
+          },
+          {
+            "intent": "laptop_repair",
+            "score": 0.575937
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9157403211903189,
+        "margin": 0.33758203665480757,
+        "negative_score": 0.5452279719574478,
+        "path": "semantic",
+        "retrieved_documents": [
+          "incident-priority-sla.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "How should I proceed after failed self-service account recovery?",
+      "intent": "account_unlock",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "account_unlock",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nLocked account\n1. Stop repeated sign-in attempts. [1]\n2. Use the approved self-service account recovery page if available. [1]\n3. If recovery fails, contact IT support with your employee identifier and the displayed error. [1]\n4. Support verifies identity before unlocking the account. [1]\n5. Never include passwords or MFA codes in a ticket. [1]",
+      "milliseconds": 14.05,
+      "diagnostics": {
+        "resolved_query": "how should i proceed after failed self-service account recovery?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "account_unlock",
+            "score": 0.906858
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.710147
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.664863
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9068582002436059,
+        "margin": 0.19671137313314557,
+        "negative_score": 0.6428803588676678,
+        "path": "semantic",
+        "retrieved_documents": [
+          "account-unlock-procedure.md",
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "My company login says locked out after repeated attempts.",
+      "intent": "account_unlock",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "account_unlock",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nLocked account\n1. Stop repeated sign-in attempts. [1]\n2. Use the approved self-service account recovery page if available. [1]\n3. If recovery fails, contact IT support with your employee identifier and the displayed error. [1]\n4. Support verifies identity before unlocking the account. [1]\n5. Never include passwords or MFA codes in a ticket. [1]",
+      "milliseconds": 13.19,
+      "diagnostics": {
+        "resolved_query": "my company login says locked out after repeated attempts.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "account_unlock",
+            "score": 0.822531
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.737135
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.732886
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8225307954866182,
+        "margin": 0.08539552005502715,
+        "negative_score": 0.6872420720602329,
+        "path": "semantic",
+        "retrieved_documents": [
+          "account-unlock-procedure.md",
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Should I preserve unfamiliar sign-in notifications after an account lockout?",
+      "intent": "account_security",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "account_security",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nSuspicious activity\n\u2022 If the lockout follows unexpected MFA prompts or unfamiliar sign-in alerts, report a possible security incident. [1]\n\u2022 Do not reset or dismiss security notifications without recording them for support. [1]",
+      "milliseconds": 13.32,
+      "diagnostics": {
+        "resolved_query": "should i preserve unfamiliar sign-in notifications after an account lockout?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "account_security",
+            "score": 0.876189
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.830559
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.752754
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8761889338493347,
+        "margin": 0.04562944173812866,
+        "negative_score": 0.6664929389953613,
+        "path": "semantic",
+        "retrieved_documents": [
+          "account-unlock-procedure.md",
+          "mfa-reset-guide.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "An odd MFA request came in, and right after that my account was locked.",
+      "intent": "account_security",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "account_security",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nSuspicious activity\n\u2022 If the lockout follows unexpected MFA prompts or unfamiliar sign-in alerts, report a possible security incident. [1]\n\u2022 Do not reset or dismiss security notifications without recording them for support. [1]",
+      "milliseconds": 13.64,
+      "diagnostics": {
+        "resolved_query": "an odd mfa request came in, and right after that my account was locked.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "account_security",
+            "score": 0.885945
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.80513
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.802631
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8859449821065354,
+        "margin": 0.08081477441503815,
+        "negative_score": 0.6533429817361531,
+        "path": "semantic",
+        "retrieved_documents": [
+          "account-unlock-procedure.md",
+          "mfa-reset-guide.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "Which IT checks should I finish before a day of remote working?",
+      "intent": "remote_prepare",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_prepare",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [1]\n2. Keep the service desk contact details accessible. [1]\n3. Store work files only in approved company storage. [1]",
+      "milliseconds": 13.27,
+      "diagnostics": {
+        "resolved_query": "which it checks should i finish before a day of remote working?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_prepare",
+            "score": 0.857151
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.751049
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.699116
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8571508356512604,
+        "margin": 0.10610141389232752,
+        "negative_score": 0.7872142430309729,
+        "path": "semantic",
+        "retrieved_documents": [
+          "remote-work-checklist.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "Tomorrow is my first day working from my house; what should I test now?",
+      "intent": "remote_prepare",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_prepare",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [1]\n2. Keep the service desk contact details accessible. [1]\n3. Store work files only in approved company storage. [1]",
+      "milliseconds": 14.28,
+      "diagnostics": {
+        "resolved_query": "tomorrow is my first day working from my house; what should i test now?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_prepare",
+            "score": 0.909063
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.757501
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.67292
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9090627431869507,
+        "margin": 0.15156130537399148,
+        "negative_score": 0.6375413537025452,
+        "path": "semantic",
+        "retrieved_documents": [
+          "remote-work-checklist.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What precautions protect confidential information during remote working?",
+      "intent": "remote_safety",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_safety",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nWhile working remotely\n1. Lock your screen when away, avoid shared devices, and keep confidential work out of public view. [1]\n2. Use approved communication tools. [1]\n3. Report lost equipment or suspicious account activity to IT support immediately. [1]",
+      "milliseconds": 11.14,
+      "diagnostics": {
+        "resolved_query": "what precautions protect confidential information during remote working?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_safety",
+            "score": 0.895452
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.823344
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.708976
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.895452135530243,
+        "margin": 0.07210778219051794,
+        "negative_score": 0.7402490443213923,
+        "path": "semantic",
+        "retrieved_documents": [
+          "remote-work-checklist.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I'm working remotely in a cafe and want to follow the screen and device rules.",
+      "intent": "remote_safety",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_safety",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nWhile working remotely\n1. Lock your screen when away, avoid shared devices, and keep confidential work out of public view. [1]\n2. Use approved communication tools. [1]\n3. Report lost equipment or suspicious account activity to IT support immediately. [1]",
+      "milliseconds": 15.24,
+      "diagnostics": {
+        "resolved_query": "i'm working remotely in a cafe and want to follow the screen and device rules.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_safety",
+            "score": 0.742811
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.774251
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.771956
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7428110837936401,
+        "margin": -0.03144040030990525,
+        "negative_score": 0.6631320912579328,
+        "path": "semantic",
+        "retrieved_documents": [
+          "remote-work-checklist.md"
+        ]
+      }
+    },
+    {
+      "category": "direct",
+      "split": "development",
+      "question": "What do the MFA guide and remote work checklist say when authentication breaks at home?",
+      "intent": "remote_mfa",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_mfa",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 2,
+      "answer": "Based on the current IT knowledge base:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [2]\n2. Keep the service desk contact details accessible. [2]\n3. Store work files only in approved company storage. [2]",
+      "milliseconds": 16.68,
+      "diagnostics": {
+        "resolved_query": "what do the mfa guide and remote work checklist say when authentication breaks at home?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_mfa",
+            "score": 0.839835
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.809682
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.7949
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8398349535416056,
+        "margin": 0.030152476443946696,
+        "negative_score": 0.7757710449627356,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md",
+          "remote-work-checklist.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_indirect",
+      "split": "heldout",
+      "question": "I work remotely and my phone's authenticator is unavailable. What are my next steps?",
+      "intent": "remote_mfa",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_mfa",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 2,
+      "answer": "Based on the current IT knowledge base:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [2]\n2. Keep the service desk contact details accessible. [2]\n3. Store work files only in approved company storage. [2]",
+      "milliseconds": 16.16,
+      "diagnostics": {
+        "resolved_query": "i work remotely and my phone's authenticator is unavailable. what are my next steps?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_mfa",
+            "score": 0.863571
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.81941
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.772745
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8635707158914425,
+        "margin": 0.04416104744585536,
+        "negative_score": 0.7021257281303406,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md",
+          "remote-work-checklist.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is the laptop reimbursement limit?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.84,
+      "diagnostics": {
+        "resolved_query": "what is the laptop reimbursement limit?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_repair",
+            "score": 0.693763
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.680233
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.645969
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.6937631368637085,
+        "margin": 0.013529816858967258,
+        "negative_score": 0.8024547813859727
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is my manager's email address for VPN approval?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 9.9,
+      "diagnostics": {
+        "resolved_query": "what is my manager's email address for vpn approval?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.851981
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.769801
+          },
+          {
+            "intent": "database_request",
+            "score": 0.738309
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.8519810438156128,
+        "margin": 0.08217954635620117,
+        "negative_score": 1.0
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "How many weeks of parental leave can I take?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.26,
+      "diagnostics": {
+        "resolved_query": "how many weeks of parental leave can i take?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_prepare",
+            "score": 0.611862
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.600672
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.570931
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.6118622057520039,
+        "margin": 0.011190020331009687,
+        "negative_score": 0.7006665050586174
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is the office Wi-Fi password?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.21,
+      "diagnostics": {
+        "resolved_query": "what is the office wi-fi password?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.693705
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.666872
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.644974
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.6937045454978943,
+        "margin": 0.026832977924597934,
+        "negative_score": 0.6237310171127319
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "Can I turn off MFA permanently to avoid phone issues?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.94,
+      "diagnostics": {
+        "resolved_query": "can i turn off mfa permanently to avoid phone issues?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "mfa_reset",
+            "score": 0.776311
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.757522
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.699742
+          }
+        ],
+        "gate": "unsupported_facet",
+        "intent_score": 0.7763106591608955,
+        "margin": 0.018788456356869543,
+        "negative_score": 0.6254849880355611
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "What is the exact address of the VPN gateway?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.95,
+      "diagnostics": {
+        "resolved_query": "what is the exact address of the vpn gateway?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.807181
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.74568
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.646081
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.8071805479282308,
+        "margin": 0.061500096535103355,
+        "negative_score": 0.7867860794067383
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "development",
+      "question": "How much do I receive for home internet expenses?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.51,
+      "diagnostics": {
+        "resolved_query": "how much do i receive for home internet expenses?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.651787
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.600956
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.593548
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.6517868041992188,
+        "margin": 0.050831139087677,
+        "negative_score": 0.5875616073608398
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Which brand of laptop will IT buy me?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 9.06,
+      "diagnostics": {
+        "resolved_query": "which brand of laptop will it buy me?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_repair",
+            "score": 0.716438
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.634552
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.556712
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.7164379571806779,
+        "margin": 0.0818856193820624,
+        "negative_score": 0.8658237715310986
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Give me SQL to erase the production database.",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.04,
+      "diagnostics": {
+        "resolved_query": "give me sql to erase the production database.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_conditions",
+            "score": 0.738943
+          },
+          {
+            "intent": "database_request",
+            "score": 0.711227
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.631235
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.7389430688551759,
+        "margin": 0.02771564787894365,
+        "negative_score": 0.7904841664289358
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "What is the CEO's salary?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.18,
+      "diagnostics": {
+        "resolved_query": "what is the ceo's salary?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.485985
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.476652
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.471993
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.4859851590386137,
+        "margin": 0.009332715629647659,
+        "negative_score": 0.41389700770378113
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "When will my laptop repair be completed?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 7.64,
+      "diagnostics": {
+        "resolved_query": "when will my laptop repair be completed?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_repair",
+            "score": 0.851452
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.837048
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.665413
+          }
+        ],
+        "gate": "unsupported_facet",
+        "intent_score": 0.8514522821576779,
+        "margin": 0.014404586044085455,
+        "negative_score": 0.7650544363325162
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "What tax rules apply to remote employees?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 7.72,
+      "diagnostics": {
+        "resolved_query": "what tax rules apply to remote employees?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_prepare",
+            "score": 0.776839
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.763245
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.701348
+          }
+        ],
+        "gate": "unsupported_facet",
+        "intent_score": 0.7768386833917789,
+        "margin": 0.013593384722755064,
+        "negative_score": 0.7356919803802991
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Does HR permit permanent work from another country?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 7.74,
+      "diagnostics": {
+        "resolved_query": "does hr permit permanent work from another country?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "software_approval",
+            "score": 0.680054
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.6448
+          },
+          {
+            "intent": "laptop_repair",
+            "score": 0.636118
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.6800536298687948,
+        "margin": 0.03525381860091492,
+        "negative_score": 0.5545795494819263
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "Can you write a poem about cats?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.24,
+      "diagnostics": {
+        "resolved_query": "can you write a poem about cats?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_conditions",
+            "score": 0.473031
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.461404
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.428643
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.47303134202957153,
+        "margin": 0.011627793312072754,
+        "negative_score": 0.3076784243967049
+      }
+    },
+    {
+      "category": "unsupported",
+      "split": "heldout",
+      "question": "What happens when my manager rejects VPN approval?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.53,
+      "diagnostics": {
+        "resolved_query": "what happens when my manager rejects vpn approval?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.849141
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.804845
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.738941
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.8491408392018864,
+        "margin": 0.04429608979488242,
+        "negative_score": 0.9638461736303165
+      }
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "I need access",
+      "intent": null,
+      "outcome": "clarification",
+      "actual_outcome": "clarification",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "Which topic do you mean?\n\u2022 VPN access\n\u2022 Database access request\n\u2022 Account unlock",
+      "milliseconds": 6.7,
+      "diagnostics": {
+        "resolved_query": "i need access",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.815618
+          },
+          {
+            "intent": "database_request",
+            "score": 0.796131
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.711764
+          }
+        ],
+        "gate": "underspecified_access",
+        "intent_score": 0.8156180624848031,
+        "margin": 0.01948740528875814,
+        "negative_score": 0.646542489528656
+      }
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "Can you help with access approval?",
+      "intent": null,
+      "outcome": "clarification",
+      "actual_outcome": "clarification",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "Which topic do you mean?\n\u2022 Database access request\n\u2022 Software restrictions\n\u2022 VPN access",
+      "milliseconds": 8.33,
+      "diagnostics": {
+        "resolved_query": "can you help with access approval?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.806075
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.763216
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.762294
+          }
+        ],
+        "gate": "underspecified_access",
+        "intent_score": 0.8060747981071472,
+        "margin": 0.04285851826619236,
+        "negative_score": 0.7346740961074829
+      }
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "VPN help",
+      "intent": null,
+      "outcome": "clarification",
+      "actual_outcome": "clarification",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I found more than one possible topic. Are you asking about:\n\u2022 VPN access\n\u2022 VPN connection problems",
+      "milliseconds": 6.41,
+      "diagnostics": {
+        "resolved_query": "vpn help",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.912897
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.882036
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.708996
+          }
+        ],
+        "gate": "ambiguous_intents",
+        "intent_score": 0.912897402816856,
+        "margin": 0.03086187564820686,
+        "negative_score": 0.7828647131581522
+      }
+    },
+    {
+      "category": "ambiguous",
+      "split": "development",
+      "question": "I have an access problem",
+      "intent": null,
+      "outcome": "clarification",
+      "actual_outcome": "clarification",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "Which topic do you mean?\n\u2022 Database access request\n\u2022 VPN access\n\u2022 Database access conditions",
+      "milliseconds": 8.19,
+      "diagnostics": {
+        "resolved_query": "i have an access problem",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.818058
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.768708
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.734566
+          }
+        ],
+        "gate": "underspecified_access",
+        "intent_score": 0.8180580139160156,
+        "margin": 0.0493497023371362,
+        "negative_score": 0.7423370480537415
+      }
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What are the requirements?",
+      "context": {
+        "active_intent": "vpn_request"
+      },
+      "intent": "vpn_request",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "vpn_request",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nRequest VPN access\n1. Submit an Access Request ticket in the demo IT service portal. [1]\n2. Select VPN access, state the business reason, and attach your manager's approval. [1]\n3. IT verifies your employment status and managed laptop before granting access. [1]\n4. MFA enrollment is required before first connection. [1]",
+      "milliseconds": 13.28,
+      "diagnostics": {
+        "resolved_query": "how do i request vpn access?: what are the requirements?",
+        "used_context": true,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.958
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.816579
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.762345
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9580002116561003,
+        "margin": 0.14142119212684434,
+        "negative_score": 0.8027509690150911,
+        "path": "faq"
+      }
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "Who needs to approve it?",
+      "context": {
+        "active_intent": "database_request"
+      },
+      "intent": "database_request",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "database_request",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nRequest process\n1. Submit a database access ticket specifying the database, environment, required role, business purpose, and requested expiry date. [1]\n2. Attach approvals from your manager and the data owner. [1]\n3. The database administrator provisions the least privilege necessary after both approvals. [1]",
+      "milliseconds": 11.35,
+      "diagnostics": {
+        "resolved_query": "database access request: who needs to approve it?",
+        "used_context": true,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.945333
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.784751
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.734241
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9453333616256714,
+        "margin": 0.16058234021809603,
+        "negative_score": 0.742097020149231,
+        "path": "faq"
+      }
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What should I do next?",
+      "context": {
+        "active_intent": "mfa_reset"
+      },
+      "intent": "mfa_reset",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "mfa_reset",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]",
+      "milliseconds": 12.97,
+      "diagnostics": {
+        "resolved_query": "what should i do if mfa does not work?: what should i do next?",
+        "used_context": true,
+        "ranking": [
+          {
+            "intent": "mfa_reset",
+            "score": 0.987061
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.829599
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.746088
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9870609339195773,
+        "margin": 0.15746168279237738,
+        "negative_score": 0.6423484300167316,
+        "path": "faq"
+      }
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "And what are the targets for that?",
+      "context": {
+        "active_intent": "incident_p2"
+      },
+      "intent": "incident_p2",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p2",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nHigh priority P2\n\u2022 A high-priority P2 incident significantly affects a department and has no reasonable workaround. [1]\n\u2022 The initial response target is 1 business hour. [1]\n\u2022 The restoration target is 8 business hours. [1]\n\u2022 These are separate targets, not guaranteed resolution times. [1]\n\u2022 Business hours are Monday to Friday, 09:00 to 17:00 local company time, excluding company holidays. [1]",
+      "milliseconds": 13.78,
+      "diagnostics": {
+        "resolved_query": "high priority p2 incidents: and what are the targets for that?",
+        "used_context": true,
+        "ranking": [
+          {
+            "intent": "incident_p2",
+            "score": 0.868046
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.763061
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.747687
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8680464288010132,
+        "margin": 0.10498515790473972,
+        "negative_score": 0.7555465923412622,
+        "path": "semantic",
+        "retrieved_documents": [
+          "incident-priority-sla.md"
+        ]
+      }
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What should I report about it?",
+      "context": {
+        "active_intent": "laptop_damage"
+      },
+      "intent": "laptop_damage",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "laptop_damage",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nImmediate action\n1. Stop using a damaged company laptop. [1]\n2. For liquid spills or visible electrical damage, disconnect power if safe and do not switch the device back on. [1]\n3. Report the incident to IT support with the asset tag, description, and photos if safe to obtain. [1]\n4. Do not attempt repairs yourself. [1]",
+      "milliseconds": 12.05,
+      "diagnostics": {
+        "resolved_query": "damaged laptop: what should i report about it?",
+        "used_context": true,
+        "ranking": [
+          {
+            "intent": "laptop_damage",
+            "score": 0.926436
+          },
+          {
+            "intent": "laptop_repair",
+            "score": 0.845923
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.644257
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9264357729890498,
+        "margin": 0.08051258764053904,
+        "negative_score": 0.6614745855331421,
+        "path": "semantic",
+        "retrieved_documents": [
+          "laptop-damage-procedure.md"
+        ]
+      }
+    },
+    {
+      "category": "followup",
+      "split": "heldout",
+      "question": "What should I check beforehand?",
+      "context": {
+        "active_intent": "remote_prepare"
+      },
+      "intent": "remote_prepare",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_prepare",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [1]\n2. Keep the service desk contact details accessible. [1]\n3. Store work files only in approved company storage. [1]",
+      "milliseconds": 12.5,
+      "diagnostics": {
+        "resolved_query": "what should i check before working remotely?: what should i check beforehand?",
+        "used_context": true,
+        "ranking": [
+          {
+            "intent": "remote_prepare",
+            "score": 0.98655
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.868574
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.730523
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.9865502397045854,
+        "margin": 0.11797634350071451,
+        "negative_score": 0.7054496231943157,
+        "path": "faq"
+      }
+    },
+    {
+      "category": "multi_source",
+      "split": "heldout",
+      "question": "My authenticator fails while I am working away from the office. I need both reset guidance and remote IT checks.",
+      "intent": "remote_mfa",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_mfa",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 2,
+      "answer": "The documented process is:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [2]\n2. Keep the service desk contact details accessible. [2]\n3. Store work files only in approved company storage. [2]",
+      "milliseconds": 19.24,
+      "diagnostics": {
+        "resolved_query": "my authenticator fails while i am working away from the office. i need both reset guidance and remote it checks.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_mfa",
+            "score": 0.869515
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.816907
+          },
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.801775
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.869514797046343,
+        "margin": 0.0526080359309552,
+        "negative_score": 0.7346622505985362,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md",
+          "remote-work-checklist.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "similar_wrong",
+      "split": "heldout",
+      "question": "My VPN works, but my account is locked. How can I unlock it?",
+      "intent": "account_unlock",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "account_unlock",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nLocked account\n1. Stop repeated sign-in attempts. [1]\n2. Use the approved self-service account recovery page if available. [1]\n3. If recovery fails, contact IT support with your employee identifier and the displayed error. [1]\n4. Support verifies identity before unlocking the account. [1]\n5. Never include passwords or MFA codes in a ticket. [1]",
+      "milliseconds": 15.09,
+      "diagnostics": {
+        "resolved_query": "my vpn works, but my account is locked. how can i unlock it?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "account_unlock",
+            "score": 0.78822
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.811967
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.691078
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7882201797830966,
+        "margin": -0.02374639405232215,
+        "negative_score": 0.7102382951832846,
+        "path": "semantic",
+        "retrieved_documents": [
+          "account-unlock-procedure.md",
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "typo_short",
+      "split": "heldout",
+      "question": "vpm conection error",
+      "intent": "vpn_connection",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "vpn_connection",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nConnection problems\n1. Confirm your internet connection, open the approved VPN client, and authenticate with your company account and MFA. [1]\n2. If the connection fails, record the error message and contact IT support. [1]\n3. Never share passwords or MFA codes. [1]",
+      "milliseconds": 12.17,
+      "diagnostics": {
+        "resolved_query": "vpn connection error",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_connection",
+            "score": 0.903996
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.786114
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.65482
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.903996017694355,
+        "margin": 0.11788225525266705,
+        "negative_score": 0.7516904101279503,
+        "path": "semantic",
+        "retrieved_documents": [
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "My company computer took a hard fall and its casing is damaged. What should I report?",
+      "intent": "laptop_damage",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "laptop_damage",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nImmediate action\n1. Stop using a damaged company laptop. [1]\n2. For liquid spills or visible electrical damage, disconnect power if safe and do not switch the device back on. [1]\n3. Report the incident to IT support with the asset tag, description, and photos if safe to obtain. [1]\n4. Do not attempt repairs yourself. [1]",
+      "milliseconds": 15.51,
+      "diagnostics": {
+        "resolved_query": "my company computer took a hard fall and its casing is damaged. what should i report?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_damage",
+            "score": 0.838007
+          },
+          {
+            "intent": "laptop_repair",
+            "score": 0.755443
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.685205
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8380069829221393,
+        "margin": 0.08256360331473589,
+        "negative_score": 0.5994195342063904,
+        "path": "semantic",
+        "retrieved_documents": [
+          "laptop-damage-procedure.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "I need the approvals for a database role and the details to put in the ticket.",
+      "intent": "database_request",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "database_request",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nRequest process\n1. Submit a database access ticket specifying the database, environment, required role, business purpose, and requested expiry date. [1]\n2. Attach approvals from your manager and the data owner. [1]\n3. The database administrator provisions the least privilege necessary after both approvals. [1]",
+      "milliseconds": 15.02,
+      "diagnostics": {
+        "resolved_query": "i need the approvals for a database role and the details to put in the ticket.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.819404
+          },
+          {
+            "intent": "software_approval",
+            "score": 0.739571
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.725877
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.819404125213623,
+        "margin": 0.07983314990997314,
+        "negative_score": 0.6464759496734124,
+        "path": "semantic",
+        "retrieved_documents": [
+          "database-access-sop.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "Can a coworker borrow my production database login?",
+      "intent": "database_conditions",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "database_conditions",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Here's the documented guidance:\n\nAccess conditions\n\u2022 Production access requires MFA and an approved managed device. [1]\n\u2022 Read-only access is the default. [1]\n\u2022 Write access requires an explicit data-owner justification. [1]\n\u2022 Access expires on the approved date and must be requested again if still needed. [1]\n\u2022 Never share database credentials. [1]",
+      "milliseconds": 13.15,
+      "diagnostics": {
+        "resolved_query": "can a coworker borrow my production database login?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_conditions",
+            "score": 0.802829
+          },
+          {
+            "intent": "database_request",
+            "score": 0.764521
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.737372
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8028287648311657,
+        "margin": 0.0383075692121293,
+        "negative_score": 0.7351673403282571,
+        "path": "semantic",
+        "retrieved_documents": [
+          "database-access-sop.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "The IT catalog doesn't contain a program I need. How do I ask for it?",
+      "intent": "software_approval",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "software_approval",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nApproval required\n\u2022 Employees may install software from the approved company software catalog. [1]\n\u2022 Software outside the catalog requires an IT service request, a business justification, and manager approval. [1]\n\u2022 IT reviews licensing and security before installation. [1]\n\u2022 Employees must not bypass device management or use personal administrator accounts. [1]",
+      "milliseconds": 15.04,
+      "diagnostics": {
+        "resolved_query": "the it catalog doesn't contain a program i need. how do i ask for it?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "software_approval",
+            "score": 0.771516
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.722199
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.711024
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.7715163094709118,
+        "margin": 0.049317584724207664,
+        "negative_score": 0.6095072496524795,
+        "path": "semantic",
+        "retrieved_documents": [
+          "software-installation-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "For a P2 ticket, are restoration and initial response the same target?",
+      "intent": "incident_p2",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p2",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nHigh priority P2\n\u2022 A high-priority P2 incident significantly affects a department and has no reasonable workaround. [1]\n\u2022 The initial response target is 1 business hour. [1]\n\u2022 The restoration target is 8 business hours. [1]\n\u2022 These are separate targets, not guaranteed resolution times. [1]\n\u2022 Business hours are Monday to Friday, 09:00 to 17:00 local company time, excluding company holidays. [1]",
+      "milliseconds": 12.91,
+      "diagnostics": {
+        "resolved_query": "for a p2 ticket, are restoration and initial response the same target?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p2",
+            "score": 0.829436
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.771883
+          },
+          {
+            "intent": "incident_p1",
+            "score": 0.728568
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8294361335375244,
+        "margin": 0.05755351690187693,
+        "negative_score": 0.7641563187791045,
+        "path": "semantic",
+        "retrieved_documents": [
+          "incident-priority-sla.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "I was sent an enrollment link after an MFA reset. What do I do with it?",
+      "intent": "mfa_enrollment",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "mfa_enrollment",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "Based on the current IT knowledge base:\n\nRe-enrollment\n1. After identity verification, IT issues a time-limited enrollment link through the registered recovery channel. [1]\n2. Register the new authenticator and complete a test sign-in. [1]\n3. Never send support a password, recovery code, or one-time MFA code. [1]",
+      "milliseconds": 18.17,
+      "diagnostics": {
+        "resolved_query": "i was sent an enrollment link after an mfa reset. what do i do with it?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "mfa_enrollment",
+            "score": 0.885258
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.788392
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.681533
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8852581049578822,
+        "margin": 0.09686595490175365,
+        "negative_score": 0.7834420204162598,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "At home, my authenticator failed and I need remote-work guidance too.",
+      "intent": "remote_mfa",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "remote_mfa",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 2,
+      "answer": "Based on the current IT knowledge base:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [2]\n2. Keep the service desk contact details accessible. [2]\n3. Store work files only in approved company storage. [2]",
+      "milliseconds": 15.13,
+      "diagnostics": {
+        "resolved_query": "at home, my authenticator failed and i need remote-work guidance too.",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_mfa",
+            "score": 0.889258
+          },
+          {
+            "intent": "mfa_reset",
+            "score": 0.80414
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.779843
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8892584708112027,
+        "margin": 0.085118081845596,
+        "negative_score": 0.7150969505310059,
+        "path": "semantic",
+        "retrieved_documents": [
+          "mfa-reset-guide.md",
+          "remote-work-checklist.md",
+          "vpn-access-policy.md"
+        ]
+      }
+    },
+    {
+      "category": "paraphrase_validation",
+      "split": "validation",
+      "question": "Is there a guaranteed fix time for a critical incident?",
+      "intent": "incident_p1",
+      "outcome": "answered",
+      "actual_outcome": "answered",
+      "actual_intent": "incident_p1",
+      "intent_top1_correct": true,
+      "intent_top3_hit": true,
+      "retrieval_hit": true,
+      "all_expected_sources": true,
+      "citation_valid": true,
+      "evidence_supported": true,
+      "citation_count": 1,
+      "answer": "The documented process is:\n\nCritical priority P1\n\u2022 A critical P1 incident is a company-wide outage or confirmed active security incident. [1]\n\u2022 Contact the emergency IT support channel immediately. [1]\n\u2022 The initial response target is 15 minutes, monitored around the clock. [1]\n\u2022 This synthetic policy does not define a guaranteed resolution time. [1]",
+      "milliseconds": 13.26,
+      "diagnostics": {
+        "resolved_query": "is there a guaranteed fix time for a critical incident?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "incident_p1",
+            "score": 0.812652
+          },
+          {
+            "intent": "incident_p3",
+            "score": 0.769537
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.760133
+          }
+        ],
+        "gate": "accepted",
+        "intent_score": 0.8126524090766907,
+        "margin": 0.04311530408484232,
+        "negative_score": 0.766731858253479,
+        "path": "semantic",
+        "retrieved_documents": [
+          "incident-priority-sla.md"
+        ]
+      }
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Is a home office chair reimbursable?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 9.09,
+      "diagnostics": {
+        "resolved_query": "is a home office chair reimbursable?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_repair",
+            "score": 0.647923
+          },
+          {
+            "intent": "remote_safety",
+            "score": 0.646497
+          },
+          {
+            "intent": "vpn_request",
+            "score": 0.645802
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.6479229121162254,
+        "margin": 0.0014263181640464806,
+        "negative_score": 0.5608472489805679
+      }
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Who signs my parental leave form?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.21,
+      "diagnostics": {
+        "resolved_query": "who signs my parental leave form?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "account_unlock",
+            "score": 0.661661
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.650509
+          },
+          {
+            "intent": "software_approval",
+            "score": 0.627378
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.6616607904434251,
+        "margin": 0.011151829392255563,
+        "negative_score": 0.587543094900663
+      }
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Can you tell me tomorrow's weather?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.05,
+      "diagnostics": {
+        "resolved_query": "can you tell me tomorrow's weather?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "remote_prepare",
+            "score": 0.676942
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.587264
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.58563
+          }
+        ],
+        "gate": "weak_intent",
+        "intent_score": 0.6769420312012464,
+        "margin": 0.08967800523077962,
+        "negative_score": 0.5219019962490804
+      }
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "What is the admin password for the database?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.56,
+      "diagnostics": {
+        "resolved_query": "what is the admin password for the database?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "database_request",
+            "score": 0.785969
+          },
+          {
+            "intent": "database_conditions",
+            "score": 0.749695
+          },
+          {
+            "intent": "software_approval",
+            "score": 0.698643
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.7859693169593811,
+        "margin": 0.03627476842121602,
+        "negative_score": 0.8417466784564676
+      }
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "How many hours does VPN approval take?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.34,
+      "diagnostics": {
+        "resolved_query": "how many hours does vpn approval take?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.872162
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.752547
+          },
+          {
+            "intent": "incident_p2",
+            "score": 0.71548
+          }
+        ],
+        "gate": "unsupported_facet",
+        "intent_score": 0.8721616268157959,
+        "margin": 0.11961457870760384,
+        "negative_score": 0.7843799591064453
+      }
+    },
+    {
+      "category": "unsupported_validation",
+      "split": "validation",
+      "question": "Can I claim money for a stolen personal laptop?",
+      "intent": null,
+      "outcome": "fallback",
+      "actual_outcome": "fallback",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "I couldn't find enough information in the current IT knowledge base to answer that reliably. Try asking about VPN access, MFA, laptop issues, software installation, database access, account unlocks, remote work IT procedures, or incident SLAs.",
+      "milliseconds": 8.8,
+      "diagnostics": {
+        "resolved_query": "can i claim money for a stolen personal laptop?",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "laptop_repair",
+            "score": 0.737071
+          },
+          {
+            "intent": "laptop_damage",
+            "score": 0.720688
+          },
+          {
+            "intent": "software_restrictions",
+            "score": 0.638084
+          }
+        ],
+        "gate": "negative_example",
+        "intent_score": 0.7370714827861222,
+        "margin": 0.01638354032224265,
+        "negative_score": 0.7612174295653459
+      }
+    },
+    {
+      "category": "ambiguity_validation",
+      "split": "validation",
+      "question": "Please help me get access",
+      "intent": null,
+      "outcome": "clarification",
+      "actual_outcome": "clarification",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "Which topic do you mean?\n\u2022 VPN access\n\u2022 Database access request\n\u2022 Account unlock",
+      "milliseconds": 7.72,
+      "diagnostics": {
+        "resolved_query": "please help me get access",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.819599
+          },
+          {
+            "intent": "database_request",
+            "score": 0.805018
+          },
+          {
+            "intent": "account_unlock",
+            "score": 0.752308
+          }
+        ],
+        "gate": "underspecified_access",
+        "intent_score": 0.8195992493151738,
+        "margin": 0.014580990771715707,
+        "negative_score": 0.705832961723178
+      }
+    },
+    {
+      "category": "ambiguity_validation",
+      "split": "validation",
+      "question": "vpn",
+      "intent": null,
+      "outcome": "clarification",
+      "actual_outcome": "clarification",
+      "actual_intent": null,
+      "intent_top1_correct": null,
+      "intent_top3_hit": null,
+      "retrieval_hit": null,
+      "all_expected_sources": null,
+      "citation_valid": null,
+      "evidence_supported": null,
+      "citation_count": 0,
+      "answer": "Which topic do you mean?\n\u2022 VPN access\n\u2022 VPN connection problems\n\u2022 Prepare for remote work",
+      "milliseconds": 6.38,
+      "diagnostics": {
+        "resolved_query": "vpn",
+        "used_context": false,
+        "ranking": [
+          {
+            "intent": "vpn_request",
+            "score": 0.905133
+          },
+          {
+            "intent": "vpn_connection",
+            "score": 0.840712
+          },
+          {
+            "intent": "remote_prepare",
+            "score": 0.700541
+          }
+        ],
+        "gate": "underspecified_access",
+        "intent_score": 0.9051333069801331,
+        "margin": 0.064421330669165,
+        "negative_score": 0.7715819614182747
+      }
+    }
+  ]
+}

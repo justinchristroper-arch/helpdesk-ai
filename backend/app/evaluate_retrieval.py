@@ -9,7 +9,7 @@ from pathlib import Path
 
 from sqlalchemy import select
 
-from app.ai import embed
+from app.embeddings import embed
 from app.config import get_settings
 from app.db import Session
 from app.models import Chunk, Document
@@ -57,7 +57,7 @@ def main():
         "unsupported_retrieval_gate_abstention_rate": sum(r["retrieval_gate_abstained"] for r in unsupported) / len(unsupported),
         "answer_support_rate": None,
         "citation_correctness": None,
-        "note": "These are real embedding and pgvector retrieval measurements. Generation and semantic support require the DeepSeek key and human review.",
+        "note": "Legacy retrieval-only measurement. The current no-generation architecture is evaluated by python -m app.evaluate.",
         "cases": results,
     }
     print(json.dumps(report, indent=2))

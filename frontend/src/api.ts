@@ -14,6 +14,8 @@ export type Message = {
   content: string;
   outcome?: string;
   sources: Source[];
+  intent_id?: string;
+  clarification?: { intent_id: string; topic: string; question: string }[];
 };
 export type Conversation = { id: string; title: string };
 export type Document = {

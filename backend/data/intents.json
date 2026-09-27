@@ -1,0 +1,992 @@
+{
+  "version": 1,
+  "intents": [
+    {
+      "intent_id": "vpn_request",
+      "topic": "VPN access",
+      "canonical_question": "How do I request VPN access?",
+      "paraphrases": [
+        "I need VPN access",
+        "Where can I apply for the company VPN?",
+        "vpn request",
+        "Can IT enable remote network access for me?",
+        "I need internal systems from outside the office",
+        "What's the approval process for VPN?",
+        "Please help me get onto the corporate network from home",
+        "new employee needs vpn",
+        "How do I submit a vpm access request?"
+      ],
+      "keywords": [
+        "vpn",
+        "remote network",
+        "internal systems",
+        "internal network",
+        "corporate network"
+      ],
+      "negative_examples": [
+        "My VPN disconnects every minute",
+        "What is my manager's email address for VPN approval?",
+        "What happens if my manager rejects my VPN request?"
+      ],
+      "answer_type": "procedure",
+      "evidence": [
+        {
+          "filename": "vpn-access-policy.md",
+          "section": "Request VPN access",
+          "facts": [
+            "Submit an Access Request ticket in the demo IT service portal.",
+            "Select VPN access, state the business reason, and attach your manager's approval.",
+            "IT verifies your employment status and managed laptop before granting access.",
+            "MFA enrollment is required before first connection."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "manager.*reject",
+        "manager.*email",
+        "server address",
+        "gateway",
+        "phone number",
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "vpn_connection",
+      "topic": "VPN connection problems",
+      "canonical_question": "What should I do when VPN fails to connect?",
+      "paraphrases": [
+        "My VPN keeps failing",
+        "vpn disconnected",
+        "The approved VPN client will not connect",
+        "I get an error connecting to the work network",
+        "How can I troubleshoot a VPN connection?",
+        "I'm online but the company VPN won't let me in",
+        "vpn conection error",
+        "What information should I give IT about a VPN failure?",
+        "I already have VPN access but cannot connect"
+      ],
+      "keywords": [
+        "vpn",
+        "connection",
+        "connect",
+        "tunnel"
+      ],
+      "negative_examples": [
+        "I need new VPN access",
+        "Can I use my personal VPN subscription?",
+        "What is the VPN server address?"
+      ],
+      "answer_type": "troubleshooting",
+      "evidence": [
+        {
+          "filename": "vpn-access-policy.md",
+          "section": "Connection problems",
+          "facts": [
+            "Confirm your internet connection, open the approved VPN client, and authenticate with your company account and MFA.",
+            "If the connection fails, record the error message and contact IT support.",
+            "Never share passwords or MFA codes."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "exclude_patterns": [
+        "vpn works.*account.*lock"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "mfa_reset",
+      "topic": "MFA reset",
+      "canonical_question": "What should I do if MFA does not work?",
+      "paraphrases": [
+        "My authenticator stopped working",
+        "I changed phones and cannot authenticate",
+        "mfa broken",
+        "I lost the phone used for sign-in",
+        "My authentication app won't give working codes",
+        "Can support reset my second factor?",
+        "The login asks for a code but my phone is unavailable",
+        "authentcator not working",
+        "What checks can I try before requesting an MFA reset?"
+      ],
+      "keywords": [
+        "mfa",
+        "authenticator",
+        "phone",
+        "two factor",
+        "sign-in app",
+        "codes"
+      ],
+      "negative_examples": [
+        "My laptop password is forgotten",
+        "My account is locked",
+        "My VPN disconnected"
+      ],
+      "answer_type": "troubleshooting",
+      "evidence": [
+        {
+          "filename": "mfa-reset-guide.md",
+          "section": "MFA stops working",
+          "facts": [
+            "Check that your phone has network access and automatic time enabled.",
+            "If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset.",
+            "Support verifies identity through the registered employee recovery process before resetting enrollment.",
+            "Do not approve unexpected sign-in prompts."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "turn off.*mfa",
+        "disable.*mfa",
+        "bypass.*mfa",
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "mfa_enrollment",
+      "topic": "MFA re-enrollment",
+      "canonical_question": "How do I enroll a new authenticator after a reset?",
+      "paraphrases": [
+        "IT verified me; how do I set up MFA again?",
+        "Where does the new enrollment link arrive?",
+        "register new authenticator after reset",
+        "What comes after an MFA reset?",
+        "Can I send my one-time code to the helpdesk?",
+        "Do I need a test sign-in after registering my new authenticator?",
+        "How is the MFA enrollment link delivered?",
+        "mfa reenrolment steps",
+        "I've completed identity verification and need the new authenticator"
+      ],
+      "keywords": [
+        "mfa",
+        "authenticator",
+        "enrollment",
+        "reset"
+      ],
+      "negative_examples": [
+        "What is the MFA reset fee?",
+        "Can I disable MFA permanently?",
+        "My account is locked"
+      ],
+      "answer_type": "procedure",
+      "evidence": [
+        {
+          "filename": "mfa-reset-guide.md",
+          "section": "Re-enrollment",
+          "facts": [
+            "After identity verification, IT issues a time-limited enrollment link through the registered recovery channel.",
+            "Register the new authenticator and complete a test sign-in.",
+            "Never send support a password, recovery code, or one-time MFA code."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "turn off.*mfa",
+        "disable.*mfa",
+        "bypass.*mfa",
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "laptop_damage",
+      "topic": "Damaged laptop",
+      "canonical_question": "What should I do if my laptop is damaged?",
+      "paraphrases": [
+        "I spilled water on my work laptop",
+        "company laptop broken",
+        "There is visible electrical damage on my computer",
+        "My laptop got wet; should I turn it on?",
+        "How do I report a damaged company device?",
+        "The screen is cracked and I need to tell IT",
+        "I dropped my work computer",
+        "laptpo liquid spill",
+        "What details should a laptop damage report include?"
+      ],
+      "keywords": [
+        "laptop",
+        "spill",
+        "damaged",
+        "broken",
+        "coffee",
+        "computer",
+        "liquid"
+      ],
+      "negative_examples": [
+        "What is the laptop reimbursement limit?",
+        "Can I buy a new laptop and expense it?",
+        "My laptop password is forgotten"
+      ],
+      "answer_type": "troubleshooting",
+      "evidence": [
+        {
+          "filename": "laptop-damage-procedure.md",
+          "section": "Immediate action",
+          "facts": [
+            "Stop using a damaged company laptop.",
+            "For liquid spills or visible electrical damage, disconnect power if safe and do not switch the device back on.",
+            "Report the incident to IT support with the asset tag, description, and photos if safe to obtain.",
+            "Do not attempt repairs yourself."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "laptop_repair",
+      "topic": "Laptop repair and replacement",
+      "canonical_question": "How are laptop repairs and replacement handled?",
+      "paraphrases": [
+        "Can I take my company laptop to a repair shop?",
+        "Who arranges a replacement work laptop?",
+        "I need a temporary loan laptop",
+        "manager approval for loan device",
+        "Can I ship my broken computer for repairs myself?",
+        "How does IT arrange equipment repair?",
+        "Who approves a temporary device for business continuity?",
+        "Can a third party fix my work computer?",
+        "laptop replacment process"
+      ],
+      "keywords": [
+        "laptop",
+        "repair",
+        "replacement",
+        "loan",
+        "loaner",
+        "repairs"
+      ],
+      "negative_examples": [
+        "How much is the laptop replacement allowance?",
+        "Which laptop model will I receive?",
+        "How long does repair take?"
+      ],
+      "answer_type": "policy",
+      "evidence": [
+        {
+          "filename": "laptop-damage-procedure.md",
+          "section": "Repair and replacement",
+          "facts": [
+            "IT assesses the device and arranges approved repair or replacement.",
+            "Your manager approves a temporary loan device when business continuity requires it.",
+            "Do not ship equipment or use a third-party repair shop without IT approval."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "how long",
+        "when.*(repair|complet)",
+        "turnaround",
+        "eta",
+        "allowance",
+        "reimbursement",
+        "which.*model",
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "software_approval",
+      "topic": "Software approval",
+      "canonical_question": "Can I install software without approval?",
+      "paraphrases": [
+        "I need an app that isn't in the company catalog",
+        "How do I request a new work application?",
+        "software install permission",
+        "Can I use my personal admin account to install an app?",
+        "What approvals are needed for noncatalog software?",
+        "Where can employees install approved applications from?",
+        "I found a tool for work; how do I get it approved?",
+        "Who checks software licensing and security?",
+        "softwre installation request"
+      ],
+      "keywords": [
+        "software",
+        "install",
+        "application",
+        "catalog"
+      ],
+      "negative_examples": [
+        "What is the approved version of Photoshop?",
+        "Does the company pay for ChatGPT?",
+        "I need database write access"
+      ],
+      "answer_type": "approval",
+      "evidence": [
+        {
+          "filename": "software-installation-policy.md",
+          "section": "Approval required",
+          "facts": [
+            "Employees may install software from the approved company software catalog.",
+            "Software outside the catalog requires an IT service request, a business justification, and manager approval.",
+            "IT reviews licensing and security before installation.",
+            "Employees must not bypass device management or use personal administrator accounts."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "software_restrictions",
+      "topic": "Software restrictions",
+      "canonical_question": "Is free software exempt from approval?",
+      "paraphrases": [
+        "The app is free; do I still need approval?",
+        "Can I download software from an unverified website?",
+        "unlicensed software policy",
+        "Is a free license enough to install an app?",
+        "What software downloads are prohibited?",
+        "Can I use pirated software for work?",
+        "Do freeware tools bypass the approval process?",
+        "What if the software costs nothing?",
+        "Is downloading an unofficial app allowed?"
+      ],
+      "keywords": [
+        "software",
+        "free",
+        "unlicensed",
+        "download",
+        "freeware"
+      ],
+      "negative_examples": [
+        "What is our annual software budget?",
+        "Which free app should I use?",
+        "Can I get a reimbursement for software?"
+      ],
+      "answer_type": "policy",
+      "evidence": [
+        {
+          "filename": "software-installation-policy.md",
+          "section": "Prohibited actions",
+          "facts": [
+            "Unlicensed software and downloads from unverified sources are prohibited.",
+            "A free license does not remove the approval requirement for software outside the catalog."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "database_request",
+      "topic": "Database access request",
+      "canonical_question": "How do I request database access?",
+      "paraphrases": [
+        "I need access to a project database",
+        "Who must approve database access?",
+        "database permission ticket",
+        "What details go in a database access request?",
+        "Can the DBA grant access after my manager approves?",
+        "How do I ask for a database role in staging?",
+        "Where do I explain the business purpose for database access?",
+        "db acess request",
+        "Do I need the data owner's approval as well as my manager's?"
+      ],
+      "keywords": [
+        "database",
+        "data owner",
+        "db access"
+      ],
+      "negative_examples": [
+        "What is the production database password?",
+        "Can I bypass the data owner?",
+        "How do I request VPN access?"
+      ],
+      "answer_type": "procedure",
+      "evidence": [
+        {
+          "filename": "database-access-sop.md",
+          "section": "Request process",
+          "facts": [
+            "Submit a database access ticket specifying the database, environment, required role, business purpose, and requested expiry date.",
+            "Attach approvals from your manager and the data owner.",
+            "The database administrator provisions the least privilege necessary after both approvals."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "database_conditions",
+      "topic": "Database access conditions",
+      "canonical_question": "What are the requirements for production database access?",
+      "paraphrases": [
+        "Is database access read-only by default?",
+        "What do I need for database write permissions?",
+        "My database access expired; what happens next?",
+        "Can I share database credentials with a colleague?",
+        "production db access requirements",
+        "Does production access need a managed device?",
+        "Is MFA required to access the production database?",
+        "How do I renew expired database access?",
+        "write access justification"
+      ],
+      "keywords": [
+        "database",
+        "production",
+        "write",
+        "read only"
+      ],
+      "negative_examples": [
+        "What SQL query should I run to delete a table?",
+        "How many days does database access last?",
+        "Who is our database owner?"
+      ],
+      "answer_type": "requirements",
+      "evidence": [
+        {
+          "filename": "database-access-sop.md",
+          "section": "Access conditions",
+          "facts": [
+            "Production access requires MFA and an approved managed device.",
+            "Read-only access is the default.",
+            "Write access requires an explicit data-owner justification.",
+            "Access expires on the approved date and must be requested again if still needed.",
+            "Never share database credentials."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "incident_p1",
+      "topic": "Critical P1 incidents",
+      "canonical_question": "What is the SLA for a critical P1 incident?",
+      "paraphrases": [
+        "The entire company is offline; what should I do?",
+        "p1 response time",
+        "How quickly should IT respond to a critical outage?",
+        "Is critical incident support monitored overnight?",
+        "Does P1 have a guaranteed resolution time?",
+        "What counts as a critical incident?",
+        "We have a confirmed active security incident",
+        "critical incident escalation",
+        "company wide outage urgent help"
+      ],
+      "keywords": [
+        "p1",
+        "critical",
+        "company wide",
+        "outage",
+        "security incident"
+      ],
+      "negative_examples": [
+        "What is the emergency phone number?",
+        "Will a P1 be fixed within fifteen minutes?",
+        "What is the financial penalty for missing an SLA?"
+      ],
+      "answer_type": "sla",
+      "evidence": [
+        {
+          "filename": "incident-priority-sla.md",
+          "section": "Critical priority P1",
+          "facts": [
+            "A critical P1 incident is a company-wide outage or confirmed active security incident.",
+            "Contact the emergency IT support channel immediately.",
+            "The initial response target is 15 minutes, monitored around the clock.",
+            "This synthetic policy does not define a guaranteed resolution time."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ]
+    },
+    {
+      "intent_id": "incident_p2",
+      "topic": "High priority P2 incidents",
+      "canonical_question": "What is the SLA for a high-priority P2 incident?",
+      "paraphrases": [
+        "An entire department is affected and has no workaround",
+        "p2 response and restoration targets",
+        "How long is the initial response for high priority?",
+        "What hours count as business hours for P2?",
+        "Is the eight-hour restoration target a guarantee?",
+        "What makes an incident high priority?",
+        "Our department is blocked; what target applies?",
+        "high priority incident sla",
+        "When does the P2 business-hours clock run?"
+      ],
+      "keywords": [
+        "p2",
+        "high priority",
+        "department",
+        "business hours"
+      ],
+      "negative_examples": [
+        "Will I get compensation if P2 misses its target?",
+        "What are this year's company holidays?",
+        "Is all support available 24 hours?"
+      ],
+      "answer_type": "sla",
+      "evidence": [
+        {
+          "filename": "incident-priority-sla.md",
+          "section": "High priority P2",
+          "facts": [
+            "A high-priority P2 incident significantly affects a department and has no reasonable workaround.",
+            "The initial response target is 1 business hour.",
+            "The restoration target is 8 business hours.",
+            "These are separate targets, not guaranteed resolution times.",
+            "Business hours are Monday to Friday, 09:00 to 17:00 local company time, excluding company holidays."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ]
+    },
+    {
+      "intent_id": "incident_p3",
+      "topic": "Normal priority P3 incidents",
+      "canonical_question": "What is the response target for a normal P3 incident?",
+      "paraphrases": [
+        "Only I am affected and I have another way to work",
+        "p3 response time",
+        "How is restoration prioritized for normal incidents?",
+        "What qualifies as a normal-priority incident?",
+        "I can use a workaround; what priority is that?",
+        "Does P3 mean one business day for initial response?",
+        "normal incident support target",
+        "How does IT treat an individual issue with an alternative?",
+        "priority three sla"
+      ],
+      "keywords": [
+        "p3",
+        "normal priority",
+        "workaround"
+      ],
+      "negative_examples": [
+        "What is the guaranteed P3 resolution time?",
+        "Can I demand P1 for a minor issue?",
+        "Who is on call tonight?"
+      ],
+      "answer_type": "sla",
+      "evidence": [
+        {
+          "filename": "incident-priority-sla.md",
+          "section": "Normal priority P3",
+          "facts": [
+            "A normal-priority P3 incident affects an individual with a workable alternative.",
+            "The initial response target is 1 business day.",
+            "IT prioritizes restoration according to impact and available workarounds."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "prefer_patterns": [
+        "one employee",
+        "only.*affect.*me",
+        "work.*another way",
+        "individual.*workaround"
+      ]
+    },
+    {
+      "intent_id": "account_unlock",
+      "topic": "Account unlock",
+      "canonical_question": "How do I unlock my company account?",
+      "paraphrases": [
+        "My work account is locked",
+        "too many login attempts",
+        "I can't sign in because my account is locked out",
+        "Self-service recovery failed; what next?",
+        "What information should I give support for an account unlock?",
+        "Should I keep trying my password after a lockout?",
+        "account unlok help",
+        "Do I send my password in the unlock ticket?",
+        "Who verifies my identity before unlocking my account?"
+      ],
+      "keywords": [
+        "account",
+        "locked",
+        "lockout",
+        "recovery"
+      ],
+      "negative_examples": [
+        "My authenticator stopped working",
+        "How do I reset my laptop BIOS password?",
+        "Can I unlock someone else's account?"
+      ],
+      "answer_type": "procedure",
+      "evidence": [
+        {
+          "filename": "account-unlock-procedure.md",
+          "section": "Locked account",
+          "facts": [
+            "Stop repeated sign-in attempts.",
+            "Use the approved self-service account recovery page if available.",
+            "If recovery fails, contact IT support with your employee identifier and the displayed error.",
+            "Support verifies identity before unlocking the account.",
+            "Never include passwords or MFA codes in a ticket."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "prefer_patterns": [
+        "account.*lock",
+        "locked out",
+        "unlock"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "account_security",
+      "topic": "Suspicious account activity",
+      "canonical_question": "What if my account lockout follows unexpected MFA prompts?",
+      "paraphrases": [
+        "I saw unfamiliar sign-in alerts before being locked out",
+        "Unexpected authentication prompts then my account locked",
+        "Should I dismiss a suspicious login notification?",
+        "What should I record after suspicious account activity?",
+        "possible security incident after lockout",
+        "Someone may be trying to access my account",
+        "My lockout happened after sign-in alerts I didn't recognize",
+        "How should I report suspicious lockout activity?",
+        "Should I reset everything before recording security alerts?"
+      ],
+      "keywords": [
+        "unexpected",
+        "suspicious",
+        "unfamiliar",
+        "lockout"
+      ],
+      "negative_examples": [
+        "Can you identify who hacked my account?",
+        "What is our cyber insurance coverage?",
+        "My VPN connection failed"
+      ],
+      "answer_type": "escalation",
+      "evidence": [
+        {
+          "filename": "account-unlock-procedure.md",
+          "section": "Suspicious activity",
+          "facts": [
+            "If the lockout follows unexpected MFA prompts or unfamiliar sign-in alerts, report a possible security incident.",
+            "Do not reset or dismiss security notifications without recording them for support."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "required_groups": [
+        [
+          "unexpected",
+          "unfamiliar",
+          "suspicious",
+          "security",
+          "odd",
+          "someone"
+        ]
+      ],
+      "prefer_patterns": [
+        "unfamiliar",
+        "unexpected",
+        "suspicious",
+        "odd"
+      ],
+      "unsupported_patterns": [
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "remote_prepare",
+      "topic": "Prepare for remote work",
+      "canonical_question": "What should I check before working remotely?",
+      "paraphrases": [
+        "I'm starting work from home tomorrow; what should I check?",
+        "remote work IT checklist",
+        "How do I prepare my managed laptop for remote work?",
+        "What should I test before leaving the office?",
+        "Where should I store work files while remote?",
+        "Do I need pending updates before working from home?",
+        "What IT preparation is needed for a home working day?",
+        "I need a checklist for working away from the office",
+        "Before remote work what access should be tested?"
+      ],
+      "keywords": [
+        "remote",
+        "home",
+        "prepare",
+        "checklist"
+      ],
+      "negative_examples": [
+        "What is the home office reimbursement amount?",
+        "How many remote days am I allowed?",
+        "Can I work permanently from another country?"
+      ],
+      "answer_type": "checklist",
+      "evidence": [
+        {
+          "filename": "remote-work-checklist.md",
+          "section": "Before remote work",
+          "facts": [
+            "Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it.",
+            "Keep the service desk contact details accessible.",
+            "Store work files only in approved company storage."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "unsupported_patterns": [
+        "tax",
+        "reimbursement",
+        "expenses",
+        "how many.*days",
+        "permanent.*country",
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "remote_safety",
+      "topic": "Working remotely safely",
+      "canonical_question": "What IT precautions apply while working remotely?",
+      "paraphrases": [
+        "Can I use a shared computer for remote work?",
+        "What should I do if I lose work equipment while remote?",
+        "How should I protect work on a train?",
+        "Should I lock my screen when stepping away at home?",
+        "remote work security practices",
+        "Which communication tools should I use away from the office?",
+        "How do I report suspicious activity while working remotely?",
+        "Keeping confidential work out of public view",
+        "What are the IT safety rules during a home working day?"
+      ],
+      "keywords": [
+        "remote",
+        "screen",
+        "shared",
+        "confidential"
+      ],
+      "negative_examples": [
+        "What is the remote work tax policy?",
+        "Can I claim internet expenses?",
+        "How long can I work from abroad?"
+      ],
+      "answer_type": "checklist",
+      "evidence": [
+        {
+          "filename": "remote-work-checklist.md",
+          "section": "While working remotely",
+          "facts": [
+            "Lock your screen when away, avoid shared devices, and keep confidential work out of public view.",
+            "Use approved communication tools.",
+            "Report lost equipment or suspicious account activity to IT support immediately."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "prefer_patterns": [
+        "screen",
+        "cafe",
+        "shared computer",
+        "public view",
+        "confidential information"
+      ],
+      "unsupported_patterns": [
+        "tax",
+        "reimbursement",
+        "expenses",
+        "how many.*days",
+        "permanent.*country",
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    },
+    {
+      "intent_id": "remote_mfa",
+      "topic": "MFA trouble during remote work",
+      "canonical_question": "My MFA is broken while I'm working remotely. What should I do?",
+      "paraphrases": [
+        "I'm at home and my authenticator has stopped working",
+        "Remote work is blocked because I lost my MFA phone",
+        "Working away from the office and cannot authenticate",
+        "I need the MFA reset procedure and remote work preparation",
+        "What should a remote worker do when their authenticator fails?",
+        "MFA unavailable while working from home",
+        "My second factor is broken during a remote working day",
+        "I changed phones while remote and cannot log in",
+        "Home working setup and MFA troubleshooting"
+      ],
+      "keywords": [
+        "mfa",
+        "authenticator",
+        "remote",
+        "home"
+      ],
+      "negative_examples": [
+        "Can I bypass MFA while remote?",
+        "What is the remote worker MFA reimbursement?",
+        "Can I disable MFA at home?"
+      ],
+      "answer_type": "troubleshooting",
+      "evidence": [
+        {
+          "filename": "mfa-reset-guide.md",
+          "section": "MFA stops working",
+          "facts": [
+            "Check that your phone has network access and automatic time enabled.",
+            "If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset.",
+            "Support verifies identity through the registered employee recovery process before resetting enrollment.",
+            "Do not approve unexpected sign-in prompts."
+          ]
+        },
+        {
+          "filename": "remote-work-checklist.md",
+          "section": "Before remote work",
+          "facts": [
+            "Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it.",
+            "Keep the service desk contact details accessible.",
+            "Store work files only in approved company storage."
+          ]
+        }
+      ],
+      "follow_up_patterns": [
+        "What are the requirements?",
+        "What should I do next?"
+      ],
+      "required_groups": [
+        [
+          "mfa",
+          "authenticator",
+          "authentication",
+          "second factor"
+        ],
+        [
+          "remote",
+          "home",
+          "away from the office"
+        ]
+      ],
+      "unsupported_patterns": [
+        "turn off.*mfa",
+        "disable.*mfa",
+        "bypass.*mfa",
+        "how many.*(hours|days|minutes|weeks)",
+        "how long.*(take|wait|repair|approv)",
+        "when.*(approv|complet|finish)",
+        "turnaround time",
+        "waiting time"
+      ]
+    }
+  ]
+}

@@ -10,12 +10,12 @@ test("reports safe API errors", async () => {
         ok: false,
         status: 503,
         json: async () => ({
-          detail: "AI provider is temporarily unavailable.",
+          detail: "Local semantic search is temporarily unavailable.",
         }),
       }),
   );
   await expect(api("/chat")).rejects.toThrow(
-    "AI provider is temporarily unavailable.",
+    "Local semantic search is temporarily unavailable.",
   );
 });
 test("sets bearer authorization without placing token in URL", async () => {

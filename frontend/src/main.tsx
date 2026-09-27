@@ -59,22 +59,31 @@ export function App() {
   useEffect(() => {
     if (session)
       api<Conversation[]>("/conversations", session.token)
-        .then(setHistory)
+        .then(async (items) => {
+          setHistory(items);
+          const active = sessionStorage.getItem(`helpdesk-conversation:${session.email}`);
+          if (active && items.some((item) => item.id === active)) {
+            setMessages(await api(`/conversations/${active}`, session.token));
+            setConversation(active);
+          }
+        })
         .catch((e) => setError(errorText(e)));
   }, [session]);
   async function ask(e: React.FormEvent) {
     e.preventDefault();
-    if (!session) {
-      setLoginOpen(true);
-      return;
-    }
     if (!question.trim() || busy) return;
     setBusy(true);
     setError("");
     try {
+      let visitor = session;
+      if (!visitor) {
+        visitor = await api<Session>("/auth/guest", undefined, { method: "POST" });
+        sessionStorage.setItem("helpdesk-session", JSON.stringify(visitor));
+        setSession(visitor);
+      }
       const result = await api<{ conversation_id: string; message: Message }>(
         "/chat",
-        session.token,
+        visitor.token,
         {
           method: "POST",
           body: JSON.stringify({ question, conversation_id: conversation }),
@@ -91,8 +100,9 @@ export function App() {
         result.message,
       ]);
       setConversation(result.conversation_id);
+      sessionStorage.setItem(`helpdesk-conversation:${visitor.email}`, result.conversation_id);
       setQuestion("");
-      setHistory(await api("/conversations", session.token));
+      setHistory(await api("/conversations", visitor.token));
     } catch (e) {
       setError(errorText(e));
     } finally {
@@ -106,6 +116,7 @@ export function App() {
     try {
       setMessages(await api(`/conversations/${id}`, session.token));
       setConversation(id);
+      sessionStorage.setItem(`helpdesk-conversation:${session.email}`, id);
       navigate("/");
     } catch (e) {
       setError(errorText(e));
@@ -140,6 +151,7 @@ export function App() {
           onClick={() => {
             setMessages([]);
             setConversation(null);
+            if (session) sessionStorage.removeItem(`helpdesk-conversation:${session.email}`);
             setSource(null);
             setError("");
             navigate("/");
@@ -191,7 +203,7 @@ export function App() {
               <p>Portfolio demo · Synthetic policies</p>
             </div>
           </div>
-          {session ? (
+          {session && session.role !== "guest" ? (
             <button
               className="profile"
               onClick={() => {
@@ -220,7 +232,7 @@ export function App() {
             >
               <span className="avatar">G</span>
               <span>
-                Guest workspace<small>Sign in to ask a question</small>
+                Guest workspace<small>Administrator sign in</small>
               </span>
               <ChevronRight size={16} />
             </button>
@@ -264,7 +276,7 @@ export function App() {
                       <Sparkles size={28} />
                     </div>
                     <div className="eyebrow">
-                      YOUR INTERNAL IT KNOWLEDGE ASSISTANT
+                      EVIDENCE-FIRST IT KNOWLEDGE ASSISTANT
                     </div>
                     <h1>
                       Less searching.
@@ -272,7 +284,7 @@ export function App() {
                       <span>More getting things done.</span>
                     </h1>
                     <p>
-                      Get clear answers from your IT knowledge base.
+                      Ask questions about the demo IT knowledge base.
                       <br />
                       Every supported answer comes with sources you can verify.
                     </p>
@@ -308,12 +320,22 @@ export function App() {
                               <small>
                                 {m.outcome === "fallback"
                                   ? "Insufficient evidence"
+                                  : m.outcome === "clarification" ? "Choose a topic"
                                   : "Source-backed answer"}
                               </small>
                             </>
                           )}
                         </div>
                         <div className="message-content">{m.content}</div>
+                        {!!m.clarification?.length && (
+                          <div className="citations" aria-label="Clarification options">
+                            {m.clarification.map((option) => (
+                              <button key={option.intent_id} onClick={() => setQuestion(option.question)}>
+                                {option.topic}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         {m.sources.length > 0 && (
                           <div className="citations">
                             {m.sources.map((s) => (
@@ -444,6 +466,9 @@ export function App() {
           <Login
             onClose={() => setLoginOpen(false)}
             onLogin={(s) => {
+              setMessages([]);
+              setConversation(null);
+              setHistory([]);
               setSession(s);
               sessionStorage.setItem("helpdesk-session", JSON.stringify(s));
               setLoginOpen(false);
@@ -551,19 +576,11 @@ function Library({
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
   useEffect(() => {
-    if (session)
-      api<Document[]>("/documents", session.token)
+      api<Document[]>("/documents", session?.token)
         .then(setDocuments)
         .catch((e) => onError(errorText(e)));
   }, [session, onError]);
-  if (!session)
-    return (
-      <div className="page">
-        <h1>Knowledge base</h1>
-        <p>Sign in to browse the approved demo documents.</p>
-      </div>
-    );
-  if (manage && session.role !== "admin")
+  if (manage && session?.role !== "admin")
     return (
       <div className="page">
         <h1>Administrator access required</h1>
@@ -630,7 +647,7 @@ function Library({
               <button
                 onClick={async () => {
                   try {
-                    setDetail(await api(`/documents/${d.id}`, session.token));
+                    setDetail(await api(`/documents/${d.id}`, session?.token));
                   } catch (e) {
                     onError(errorText(e));
                   }
@@ -701,6 +718,9 @@ type Stats = {
   total_questions: number;
   answered: number;
   fallbacks: number;
+  clarifications: number;
+  top_intents: { intent: string; questions: number }[];
+  top_unmatched: { question: string; count: number }[];
   positive_feedback_percent: number | null;
   feedback_count: number;
   top_sources: { title: string; uses: number }[];
@@ -738,6 +758,7 @@ function Analytics({
               ["Questions", stats.total_questions],
               ["Answered", stats.answered],
               ["Insufficient evidence", stats.fallbacks],
+              ["Clarifications", stats.clarifications],
               [
                 "Positive feedback",
                 stats.positive_feedback_percent === null
@@ -751,6 +772,14 @@ function Analytics({
               </article>
             ))}
           </div>
+          <section className="analytics-section">
+            <h2>Top detected intents</h2>
+            {stats.top_intents.map((item) => <p key={item.intent}>{item.intent}<b>{item.questions} questions</b></p>)}
+          </section>
+          <section className="analytics-section">
+            <h2>Common unmatched questions</h2>
+            {stats.top_unmatched.map((item) => <p key={item.question}>{item.question}<b>{item.count}</b></p>)}
+          </section>
           <section className="analytics-section">
             <h2>Most cited documents</h2>
             {stats.top_sources.length ? (

@@ -17,7 +17,7 @@ def main():
         existing = client.get("/documents")
         existing.raise_for_status()
         filenames = {d["filename"] for d in existing.json()}
-        for path in sorted((Path(__file__).parent.parent / "sample-data").glob("*.md")):
+        for path in sorted((Path(__file__).parent / "knowledge").glob("*.md")):
             if path.name in filenames:
                 print("Already indexed:", path.name)
                 continue

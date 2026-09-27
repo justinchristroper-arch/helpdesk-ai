@@ -6,17 +6,17 @@ from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app import ai
+from app import embeddings, semantic
+from uuid import uuid4
 from app.auth import admin, current_user, passwords, token_for
 from app.config import get_settings
 from app.db import get_db
 from app.ingestion import InvalidDocument, chunk, extract
 from app.limits import limit
-from app.retrieval import strong_matches
 from app.models import Chunk, Conversation, Document, Feedback, Message, MessageSource, User, now
 
 settings = get_settings()
@@ -24,7 +24,7 @@ app = FastAPI(title="HelpDesk AI", description="Portfolio demonstration. Synthet
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["Authorization", "Content-Type"])
 
 
-@app.exception_handler(ai.ProviderError)
+@app.exception_handler(embeddings.EmbeddingError)
 async def provider_error(_, exc):
     return JSONResponse(status_code=503, content={"detail": str(exc)})
 
@@ -57,25 +57,34 @@ class Rating(BaseModel):
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
     db.execute(text("SELECT 1"))
-    return {"status": "ok", "ai_configured": bool(settings.deepseek_api_key if settings.ai_provider == "deepseek" else settings.openrouter_api_key)}
+    return {"status": "ok", "inference": "local-fastembed", "external_ai_required": False, "composer": semantic.VERSION}
+
+
+@app.post("/auth/guest", status_code=201)
+def guest(request: Request, db: Session = Depends(get_db)):
+    limit("guest:" + (request.client.host if request.client else "unknown"), 15)
+    user = User(email=f"guest-{uuid4().hex}@demo.invalid", password_hash="!", role="guest")
+    db.add(user)
+    db.commit()
+    return {"token": token_for(user), "role": user.role, "email": user.email}
 
 
 @app.post("/auth/login")
 def login(body: Login, request: Request, db: Session = Depends(get_db)):
     limit("login:" + (request.client.host if request.client else "unknown"), 10)
     user = db.scalar(select(User).where(User.email == body.email.lower().strip()))
-    if not user or not passwords.verify(body.password, user.password_hash):
+    if not user or user.role == "guest" or not passwords.verify(body.password, user.password_hash):
         raise HTTPException(401, "Invalid email or password.")
     return {"token": token_for(user), "role": user.role, "email": user.email}
 
 
 @app.get("/documents")
-def documents(user: User = Depends(current_user), db: Session = Depends(get_db)):
+def documents(db: Session = Depends(get_db)):
     return list(db.scalars(select(Document).where(Document.status == "ready").order_by(Document.created_at.desc())))
 
 
 @app.get("/documents/{document_id}")
-def document(document_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)):
+def document(document_id: str, db: Session = Depends(get_db)):
     doc = db.get(Document, document_id)
     if not doc or doc.status != "ready":
         raise HTTPException(404, "Document not found.")
@@ -91,7 +100,7 @@ def upload(file: UploadFile = File(...), user: User = Depends(admin), db: Sessio
     passages = chunk(extract(filename, data, settings.max_upload_bytes), settings.chunk_tokens, settings.overlap_tokens)
     if len(passages) > 500:
         raise HTTPException(422, "Document exceeds the 500-chunk limit.")
-    vectors = ai.embed([p.content for p in passages])
+    vectors = embeddings.embed([p.content for p in passages])
     mime = {".pdf": "application/pdf", ".txt": "text/plain", ".md": "text/markdown"}[PurePath(filename).suffix.lower()]
     doc = Document(title=PurePath(filename).stem[:200], filename=filename, mime_type=mime, embedding_model=settings.embedding_model, content_hash=sha256(data).hexdigest())
     db.add(doc)
@@ -118,7 +127,7 @@ def reindex(document_id: str, user: User = Depends(admin), db: Session = Depends
     if not doc:
         raise HTTPException(404, "Document not found.")
     chunks = list(db.scalars(select(Chunk).where(Chunk.document_id == document_id).order_by(Chunk.chunk_index)))
-    vectors = ai.embed([c.content for c in chunks])
+    vectors = embeddings.embed([c.content for c in chunks])
     for item, vector in zip(chunks, vectors, strict=True):
         item.embedding = vector
     doc.embedding_model = settings.embedding_model
@@ -136,7 +145,7 @@ def owned_conversation(db, conversation_id, user):
 
 def serialize_message(db, message):
     sources = list(db.scalars(select(MessageSource).where(MessageSource.message_id == message.id, MessageSource.citation_number.is_not(None)).order_by(MessageSource.citation_number)))
-    return {"id": message.id, "role": message.role, "content": message.content, "outcome": message.outcome, "sources": sources}
+    return {"id": message.id, "role": message.role, "content": message.content, "outcome": message.outcome, "intent_id": message.intent_id, "clarification": message.clarification or [], "sources": sources}
 
 
 @app.get("/conversations")
@@ -157,24 +166,19 @@ def chat(body: Question, user: User = Depends(current_user), db: Session = Depen
         raise HTTPException(422, "Enter a question.")
     limit("chat:" + user.id, 10)
     conversation = owned_conversation(db, body.conversation_id, user) if body.conversation_id else None
-    vector = ai.embed([question])[0]
-    distance = Chunk.embedding.cosine_distance(vector)
-    matches = db.execute(select(Chunk, Document, (1 - distance).label("score")).join(Document, Chunk.document_id == Document.id).where(Document.status == "ready", Document.embedding_model == settings.embedding_model).order_by(distance).limit(settings.top_k)).all()
-    eligible = strong_matches(matches, settings.minimum_similarity)
-    context = [{"title": d.title, "section": c.section, "page": c.page_number, "excerpt": c.content} for c, d, _ in eligible]
-    answer, used = ai.generate(question, context)
+    result = semantic.answer(db, question, conversation.context if conversation else None)
     if conversation is None:
         conversation = Conversation(user_id=user.id, title=question[:120])
         db.add(conversation)
         db.flush()
     conversation.updated_at = now()
+    conversation.context = result.context or (conversation.context if result.outcome == "clarification" else None)
     db.add(Message(conversation_id=conversation.id, role="user", content=question))
-    message = Message(conversation_id=conversation.id, role="assistant", content=answer, outcome="answered" if used else "fallback", model=settings.llm_model, prompt_version=ai.PROMPT_VERSION)
+    message = Message(conversation_id=conversation.id, role="assistant", content=result.content, outcome=result.outcome, model=settings.embedding_model, prompt_version=semantic.VERSION, intent_id=result.intent_id, diagnostics=result.diagnostics, clarification=result.clarification)
     db.add(message)
     db.flush()
-    cited = {eligible[index - 1][0].id: index for index in used}
-    for c, d, score in matches:
-        db.add(MessageSource(message_id=message.id, chunk_id=c.id, document_id=d.id, title=d.title, section=c.section, page_number=c.page_number, excerpt=c.content, relevance_score=float(score), citation_number=cited.get(c.id)))
+    for index, (c, d, score, facts) in enumerate(result.sources, 1):
+        db.add(MessageSource(message_id=message.id, chunk_id=c.id, document_id=d.id, title=d.title, section=c.section, page_number=c.page_number, excerpt=c.content, relevance_score=float(score), citation_number=index))
     db.commit()
     return {"conversation_id": conversation.id, "message": serialize_message(db, message)}
 
@@ -198,7 +202,11 @@ def feedback(message_id: str, body: Rating, user: User = Depends(current_user), 
 def analytics(user: User = Depends(admin), db: Session = Depends(get_db)):
     total = db.scalar(select(func.count()).select_from(Message).where(Message.role == "assistant")) or 0
     answered = db.scalar(select(func.count()).select_from(Message).where(Message.outcome == "answered")) or 0
+    clarified = db.scalar(select(func.count()).select_from(Message).where(Message.outcome == "clarification")) or 0
+    intents = db.execute(select(Message.intent_id, func.count()).where(Message.intent_id.is_not(None)).group_by(Message.intent_id).order_by(func.count().desc()).limit(10)).all()
+    unmatched_query = Message.diagnostics["resolved_query"].as_string()
+    unmatched = db.execute(select(unmatched_query, func.count()).where(Message.outcome == "fallback", Message.diagnostics.is_not(None)).group_by(unmatched_query).order_by(func.count().desc()).limit(10)).all()
     ratings = list(db.scalars(select(Feedback.rating)))
     sources = db.execute(select(MessageSource.title, func.count().label("uses")).where(MessageSource.citation_number.is_not(None)).group_by(MessageSource.title).order_by(func.count().desc()).limit(10)).all()
     recent = db.execute(select(Message.content, Message.created_at).where(Message.role == "user").order_by(Message.created_at.desc()).limit(10)).all()
-    return {"total_questions": total, "answered": answered, "fallbacks": total - answered, "positive_feedback_percent": round(100 * ratings.count(1) / len(ratings), 1) if ratings else None, "feedback_count": len(ratings), "top_sources": [{"title": t, "uses": n} for t, n in sources], "recent_queries": [{"question": q, "created_at": t} for q, t in recent]}
+    return {"total_questions": total, "answered": answered, "fallbacks": total - answered - clarified, "clarifications": clarified, "top_unmatched": [{"question": q, "count": n} for q,n in unmatched], "top_intents": [{"intent": i, "questions": n} for i, n in intents], "positive_feedback_percent": round(100 * ratings.count(1) / len(ratings), 1) if ratings else None, "feedback_count": len(ratings), "top_sources": [{"title": t, "uses": n} for t, n in sources], "recent_queries": [{"question": q, "created_at": t} for q, t in recent]}

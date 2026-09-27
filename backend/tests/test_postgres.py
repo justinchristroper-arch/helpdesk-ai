@@ -19,7 +19,7 @@ def test_vector_persistence_and_cosine_retrieval():
             connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
             connection.execute(text(f'CREATE SCHEMA "{schema}"'))
             connection.execute(text(f'SET LOCAL search_path TO "{schema}", public'))
-            Base.metadata.create_all(connection)
+            Base.metadata.create_all(connection, checkfirst=False)
             with Session(bind=connection, join_transaction_mode="create_savepoint") as db:
                 doc = Document(title="VPN", filename="vpn.md", mime_type="text/markdown", embedding_model="test")
                 db.add(doc)

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -57,6 +57,7 @@ class Conversation(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
     title: Mapped[str] = mapped_column(String(120))
+    context: Mapped[dict | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
 
@@ -70,6 +71,9 @@ class Message(Base):
     outcome: Mapped[str | None] = mapped_column(String(30))
     model: Mapped[str | None] = mapped_column(String(150))
     prompt_version: Mapped[str | None] = mapped_column(String(30))
+    intent_id: Mapped[str | None] = mapped_column(String(100))
+    diagnostics: Mapped[dict | None] = mapped_column(JSON)
+    clarification: Mapped[list | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
@@ -96,3 +100,14 @@ class Feedback(Base):
     rating: Mapped[int]
     note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class IntentExample(Base):
+    __tablename__ = "intent_examples"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    intent_id: Mapped[str] = mapped_column(String(100), index=True)
+    content: Mapped[str] = mapped_column(Text)
+    negative: Mapped[bool]
+    embedding_model: Mapped[str] = mapped_column(String(150))
+    dataset_hash: Mapped[str] = mapped_column(String(64))
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))

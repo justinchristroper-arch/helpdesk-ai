@@ -31,7 +31,8 @@ def fake_http(monkeypatch, content, finish_reason="stop", status=200, error=None
     def send(request):
         payload = json.loads(request.content)
         calls.append(payload)
-        body = error or {"model": "deepseek/deepseek-flash", "usage": {"prompt_tokens": 51, "completion_tokens": 17},
+        body = error or {"model": "deepseek/deepseek-flash", "usage": {"prompt_tokens": 51, "completion_tokens": 17,
+                         "completion_tokens_details": {"reasoning_tokens": 0}},
                          "choices": [{"finish_reason": finish_reason, "message": {"content": content}}]}
         return httpx.Response(status, json=body)
 
@@ -49,26 +50,33 @@ def fake_http(monkeypatch, content, finish_reason="stop", status=200, error=None
     return calls
 
 
-def test_synthesis_selects_only_source_facts_and_backend_citations(monkeypatch):
+def test_synthesis_uses_only_verbatim_source_facts_and_backend_citations(monkeypatch):
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: True)
-    calls = fake_http(monkeypatch, '{"fact_ids":["2.1","1.1"]}')
+    calls = fake_http(monkeypatch, "- Use a trusted network. [2]\n- Contact IT for MFA reset. [1]")
     result = generation.synthesize("What should I do?", sample_answer(), "user", "127.0.0.1")
     assert result.state == "used" and result.answer.endswith("• Use a trusted network. [2]\n• Contact IT for MFA reset. [1]")
     assert result.diagnostics()["http_success"] is True
-    assert (result.input_tokens, result.output_tokens) == (51, 17)
+    assert (result.input_tokens, result.output_tokens, result.reasoning_tokens) == (51, 17, 0)
     assert result.validation_reason == "passed"
     assert result.response_shape["content_type"] == "str"
     assert len(calls) == 1 and calls[0]["max_tokens"] == 300
+    assert set(calls[0]) == {"model", "max_tokens", "thinking", "messages"}
     assert calls[0]["model"] == "deepseek/deepseek-flash"
-    assert calls[0]["temperature"] == 0
+    assert calls[0]["thinking"] == {"type": "disabled"}
+    assert "temperature" not in calls[0]
     assert "response_format" not in calls[0]
     assert "tools" not in calls[0] and "reasoning_effort" not in calls[0]
+    assert calls[0]["messages"][0]["content"].startswith("Answer only from the approved facts below.")
+    assert "Approved facts:\n- Contact IT for MFA reset. [1]" in calls[0]["messages"][1]["content"]
 
 
 @pytest.mark.parametrize("content", [
-    '{"fact_ids":["3.1"]}', '{"fact_ids":["1.1"]}',
-    '{"fact_ids":["1.1","1.1","2.1"]}', '{"answer":"invented policy"}', "not json",
+    "Invented policy [1]\nUse a trusted network. [2]",
+    "Contact IT for MFA reset. [1]",
+    "Contact IT for MFA reset. [1]\nContact IT for MFA reset. [1]\nUse a trusted network. [2]",
+    "Contact IT for MFA reset. [3]\nUse a trusted network. [2]",
+    "not approved",
 ])
 def test_invalid_synthesis_falls_back_without_using_model_text(monkeypatch, content):
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
@@ -77,7 +85,7 @@ def test_invalid_synthesis_falls_back_without_using_model_text(monkeypatch, cont
     result = generation.synthesize("Question", sample_answer(), "user", "ip")
     assert result.answer is None and result.state in {"invalid_response", "provider_failure"}
     if result.state == "invalid_response":
-        assert result.validation_reason in {"content_not_fact_ids_json", "invalid_fact_ids"}
+        assert result.validation_reason == "content_not_approved_facts"
     assert len(calls) == 1
 
 
@@ -104,10 +112,11 @@ def test_provider_http_failure_is_single_call_and_fallback(monkeypatch):
     assert len(calls) == 1
 
 
-def test_complete_json_at_token_limit_remains_safe(monkeypatch):
+def test_complete_approved_facts_at_token_limit_remain_safe(monkeypatch):
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: True)
-    calls = fake_http(monkeypatch, '{"fact_ids":["1.1","2.1"]}', finish_reason="length")
+    calls = fake_http(monkeypatch,
+                      "Contact IT for MFA reset. [1]\nUse a trusted network. [2]", finish_reason="length")
     result = generation.synthesize("Q", sample_answer(), "u", "ip")
     assert result.state == "used" and result.finish_reason == "length" and len(calls) == 1
 

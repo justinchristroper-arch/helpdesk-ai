@@ -1,18 +1,18 @@
 # Deployment runbook
 
-Frontend target: Vercel. Backend/database target: isolated Railway project using PostgreSQL with pgvector. No GitHub push is required: deploy local source with the CLIs. No AI provider secrets are used.
+Frontend target: Vercel. The original isolated Railway deployment is blocked by the account's free resource provisioning limit. The user requested evaluation of free alternatives before migration; see [hosting assessment](hosting-options.md). No alternative resources or app deployments have been created. Vercel is linked only. No GitHub push is required. Optional DeepSeek credentials remain backend-only.
 
 ## Backend
 
 Build from backend using its Dockerfile/railway.toml. The model and tokenizer download during build; the resulting model cache was approximately 65 MB locally. Runtime uses local files only. Startup applies migrations, seeds bundled demo documents only for a new library, and idempotently indexes intents.
 
-Use a pgvector/pgvector:pg17 database service with a persistent /var/lib/postgresql/data volume, private networking, strong POSTGRES_PASSWORD, and DATABASE_URL in postgresql+psycopg format. Configure JWT_SECRET and exact CORS_ORIGINS. Never put these in frontend variables. Use one API worker. Verify extension and revision 0003 in the hosted database.
+Use PostgreSQL with pgvector, persistent storage, private networking and DATABASE_URL in postgresql+psycopg format. Configure JWT_SECRET and exact CORS_ORIGINS. Set optional DEEPSEEK_API_KEY only in the backend environment; never place it in frontend variables or the image. Use one API worker until ordinary request limits are shared. Verify extension and revision 0004 in the hosted database. PostgreSQL generation counters already work across workers.
 
-Before introducing a different database provider, verify whether the Railway pgvector image works. Supabase is only a fallback if this setup is impractical; no switch has been made.
+Railway could not provision a project, so its hosted pgvector image has not been tested. This is a quota blocker, not a pgvector failure. Neon and Supabase have been evaluated as alternatives; no switch has been made.
 
 ## Cost feasibility
 
-Local warm API measured approximately 290 MiB RAM, PostgreSQL approximately 35 MiB. The complete cold in-process offline API verification took about 1.05 seconds locally; this is not a hosted cold-start SLA. Model download is a build-time cost, not a browser action.
+Earlier local warm API measurement was approximately 290 MiB RAM, PostgreSQL approximately 35 MiB. The current full in-process offline API test completed in 1.355 seconds with a loaded container; this is not a hosted cold-start SLA. Under a separate 512 MB/0.1 CPU local container limit, the cold flow took 22.794 seconds and peak process RSS was about 338 MiB. Model download is a build-time cost, not a browser action.
 
 Railway account inspection found an active trial with approximately $4.83 credit and 28 days left. Current Railway documentation lists a Free allowance of $1/month and 0.5 GB RAM per service. Continuous operation of API and DB may exceed that credit; no indefinite-free hosting claim is made. Do not upgrade or add a paid plan without approval.
 

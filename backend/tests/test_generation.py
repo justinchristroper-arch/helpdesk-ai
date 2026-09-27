@@ -1,0 +1,96 @@
+"""Optional synthesis cannot introduce facts, citations or unbounded API calls."""
+import os
+os.environ.setdefault("JWT_SECRET", "test-only-secret-that-is-at-least-32-characters")
+import json
+from types import SimpleNamespace
+
+import httpx
+import pytest
+
+from app import generation
+from app.config import Settings
+
+
+def sample_answer():
+    sources = [
+        (SimpleNamespace(content="Contact IT for MFA reset."), SimpleNamespace(), 0.9, ["Contact IT for MFA reset."]),
+        (SimpleNamespace(content="Use a trusted network."), SimpleNamespace(), 0.8, ["Use a trusted network."]),
+    ]
+    return SimpleNamespace(outcome="answered", sources=sources)
+
+
+def settings(key="test-key"):
+    return Settings(_env_file=None, jwt_secret="test-secret-with-at-least-32-characters", deepseek_api_key=key)
+
+
+def fake_http(monkeypatch, content, finish_reason="stop", status=200):
+    calls = []
+    original_client = httpx.Client
+
+    def send(request):
+        payload = json.loads(request.content)
+        calls.append(payload)
+        return httpx.Response(status, json={"choices": [{"finish_reason": finish_reason,
+            "message": {"content": content}}]})
+
+    class Client:
+        def __init__(self, **kwargs):
+            self.client = original_client(transport=httpx.MockTransport(send))
+
+        def __enter__(self):
+            return self.client.__enter__()
+
+        def __exit__(self, *args):
+            return self.client.__exit__(*args)
+
+    monkeypatch.setattr(generation.httpx, "Client", Client)
+    return calls
+
+
+def test_synthesis_selects_only_source_facts_and_backend_citations(monkeypatch):
+    monkeypatch.setattr(generation, "get_settings", lambda: settings())
+    monkeypatch.setattr(generation, "reserve", lambda *args: True)
+    calls = fake_http(monkeypatch, '{"fact_ids":["2.1","1.1"]}')
+    answer, state = generation.synthesize("What should I do?", sample_answer(), "user", "127.0.0.1")
+    assert state == "used" and answer.endswith("• Use a trusted network. [2]\n• Contact IT for MFA reset. [1]")
+    assert len(calls) == 1 and calls[0]["max_tokens"] == 300
+    assert calls[0]["response_format"] == {"type": "json_object"}
+
+
+@pytest.mark.parametrize("content", [
+    '{"fact_ids":["3.1"]}', '{"fact_ids":["1.1"]}',
+    '{"fact_ids":["1.1","1.1","2.1"]}', '{"answer":"invented policy"}', "not json",
+])
+def test_invalid_synthesis_falls_back_without_using_model_text(monkeypatch, content):
+    monkeypatch.setattr(generation, "get_settings", lambda: settings())
+    monkeypatch.setattr(generation, "reserve", lambda *args: True)
+    calls = fake_http(monkeypatch, content)
+    answer, state = generation.synthesize("Question", sample_answer(), "user", "ip")
+    assert answer is None and state in {"invalid_response", "provider_failure"}
+    assert len(calls) == 1
+
+
+def test_disabled_or_quota_skips_network(monkeypatch):
+    monkeypatch.setattr(generation, "get_settings", lambda: settings(""))
+    assert generation.synthesize("Q", sample_answer(), "u", "ip") == (None, "disabled")
+    monkeypatch.setattr(generation, "get_settings", lambda: settings())
+    monkeypatch.setattr(generation, "reserve", lambda *args: False)
+    assert generation.synthesize("Q", sample_answer(), "u", "ip") == (None, "quota_or_storage")
+
+
+def test_provider_http_failure_is_single_call_and_fallback(monkeypatch):
+    monkeypatch.setattr(generation, "get_settings", lambda: settings())
+    monkeypatch.setattr(generation, "reserve", lambda *args: True)
+    calls = fake_http(monkeypatch, "{}", status=402)
+    assert generation.synthesize("Q", sample_answer(), "u", "ip") == (None, "provider_http_402")
+    assert len(calls) == 1
+
+
+def test_only_multisource_answer_eligible():
+    result = sample_answer()
+    assert generation.should_synthesize(result)
+    result.sources = result.sources[:1]
+    assert not generation.should_synthesize(result)
+    result.sources = sample_answer().sources
+    result.outcome = "fallback"
+    assert not generation.should_synthesize(result)

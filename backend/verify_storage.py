@@ -4,6 +4,8 @@ This proves storage/search wiring, not an embedding provider. Rows are removed
 after verification; no real or confidential documents are used.
 """
 from sqlalchemy import select, text
+from alembic.script import ScriptDirectory
+from pathlib import Path
 
 from app.db import Session
 from app.models import Chunk, Document
@@ -20,7 +22,8 @@ def main():
             FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid
             WHERE c.relname='document_chunks' AND a.attname='embedding'
         """))
-        assert version and revision == "0002" and dimension == "vector"
+        head = ScriptDirectory(str(Path(__file__).parent / "migrations")).get_current_head()
+        assert version and revision == head and dimension == "vector"
         docs = [
             Document(title="STORAGE TEST A", filename="storage-test-a.txt", mime_type="text/plain", embedding_model="storage-fixture"),
             Document(title="STORAGE TEST B", filename="storage-test-b.txt", mime_type="text/plain", embedding_model="storage-fixture"),

@@ -1,11 +1,11 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", hide_input_in_errors=True)
     database_url: str = "postgresql+psycopg://helpdesk:helpdesk@localhost:5432/helpdesk"
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dimensions: int = Field(default=384, ge=1, le=2000)
@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     evidence_minimum: float = Field(default=0.50, ge=0, le=1)
     minimum_similarity: float = Field(default=0.70, ge=0, le=1)
     max_upload_bytes: int = 10 * 1024 * 1024
+    deepseek_api_key: SecretStr | None = None
+    deepseek_model: str = "deepseek-flash"
+    deepseek_max_output_tokens: int = Field(default=300, ge=64, le=1024)
+    generation_user_daily_limit: int = Field(default=3, ge=1, le=100)
+    generation_ip_daily_limit: int = Field(default=8, ge=1, le=500)
+    generation_global_daily_limit: int = Field(default=20, ge=1, le=10000)
 
 
 @lru_cache

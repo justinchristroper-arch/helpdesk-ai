@@ -1,8 +1,8 @@
 # Verification record
 
-Local architecture checkpoint, 2026-09-27. Hosted verification is still in progress; GitHub publication is not authorized.
+Local architecture checkpoint, 2026-09-27. Hosted verification is blocked by Railway's free resource provisioning limit. The user requested a free-hosting assessment before migration; see [hosting options](hosting-options.md). Vercel is linked but not deployed. GitHub publication is not authorized.
 
-- Real PostgreSQL 17.11 and pgvector 0.8.6; Alembic 0003 at head, no pending model/schema operations.
+- Real PostgreSQL 17.11 and pgvector 0.8.6; Alembic 0004 applied with no pending model/schema operations. Storage verification passed cosine search and metadata checks at this revision.
 - Eight preserved synthetic documents and 25 source chunks; server-side FastEmbed creates 384-dimensional vectors.
 - Eighteen intents, 180 positive queries and 54 negative examples persist as 234 vectors. Repeated indexing reports zero new embeddings.
 - Backend: 51 tests passed with LIVE_SEMANTIC=1 and TEST_DATABASE_URL, including real matching, source-change fallback, vectors, context and multi-source evidence. One Starlette/httpx deprecation warning remains.
@@ -15,3 +15,7 @@ All cases and metric definitions are in evaluation-semantic.json. These are insp
 Original Docker startup failed removing a dockerInference socket. The deeper cause was not proven; the engine subsequently recovered. Host-port conflicts were resolved with project port 55432. No database volumes were deleted. Deployment builds use backend-only context to avoid an inaccessible unrelated root test cache on Windows.
 
 Local screenshots are labelled local-semantic-*.png. They are not presented as hosted evidence. Hosted URLs, deployed screenshots, final secret scan and final Git checkpoint will be recorded after the actual deployment and tests.
+
+Additional free-host feasibility check: the no-API integration passed under a local Docker limit of 512 MB RAM and 0.1 CPU in 22.794 seconds, with peak process RSS 346072 KiB and zero external socket attempts. This is a sequential cold test flow, not hosted latency or a concurrency result. Storage verification was rerun successfully against pgvector 0.8.6 and migration 0003; its migration assertion now derives the repository head instead of hardcoding the old revision.
+
+Optional DeepSeek integration checkpoint: the ignored backend/.env key is present in the running backend; key value was not logged. FastEmbed/pgvector retrieval remains unchanged. Migration 0004 adds shared, atomic PostgreSQL daily reservations (defaults: three attempts per user, eight per IP, 20 globally; max 300 output tokens). The first two real synthetic multi-source requests returned a grounded deterministic answer with two backend citations because DeepSeek returned HTTP 402 (insufficient account balance per provider documentation). The provider-generated path is therefore unverified against the real service; one-call, schema validation and failure behavior were tested with an HTTP mock. The final real-database backend suite passed 62 tests with one Starlette/httpx deprecation warning. The offline proof with the key explicitly cleared also passed a multi-source answer, with zero external socket attempts (1.355-second complete warm test flow). Frontend tests: four passed; lint and production build passed.

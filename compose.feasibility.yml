@@ -1,0 +1,5 @@
+# Local approximation of Render Free resources; not a hosted performance claim.
+services:
+  api:
+    mem_limit: 512m
+    cpus: 0.1

@@ -10,7 +10,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app import embeddings, semantic
+from app import embeddings, generation, semantic
 from uuid import uuid4
 from app.auth import admin, current_user, passwords, token_for
 from app.config import get_settings
@@ -57,7 +57,7 @@ class Rating(BaseModel):
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
     db.execute(text("SELECT 1"))
-    return {"status": "ok", "inference": "local-fastembed", "external_ai_required": False, "composer": semantic.VERSION}
+    return {"status": "ok", "inference": "local-fastembed", "external_ai_required": False, "optional_synthesis": "deepseek" if settings.deepseek_api_key else "disabled", "composer": semantic.VERSION}
 
 
 @app.post("/auth/guest", status_code=201)
@@ -160,13 +160,20 @@ def history(conversation_id: str, user: User = Depends(current_user), db: Sessio
 
 
 @app.post("/chat")
-def chat(body: Question, user: User = Depends(current_user), db: Session = Depends(get_db)):
+def chat(body: Question, request: Request, user: User = Depends(current_user), db: Session = Depends(get_db)):
     question = body.question.strip()
     if not question:
         raise HTTPException(422, "Enter a question.")
     limit("chat:" + user.id, 10)
     conversation = owned_conversation(db, body.conversation_id, user) if body.conversation_id else None
     result = semantic.answer(db, question, conversation.context if conversation else None)
+    model = settings.embedding_model
+    if generation.should_synthesize(result):
+        synthesis, state = generation.synthesize(question, result, user.id, request.client.host if request.client else "unknown")
+        result.diagnostics["generation"] = state
+        if synthesis:
+            result.content = synthesis
+            model = settings.deepseek_model
     if conversation is None:
         conversation = Conversation(user_id=user.id, title=question[:120])
         db.add(conversation)
@@ -174,7 +181,7 @@ def chat(body: Question, user: User = Depends(current_user), db: Session = Depen
     conversation.updated_at = now()
     conversation.context = result.context or (conversation.context if result.outcome == "clarification" else None)
     db.add(Message(conversation_id=conversation.id, role="user", content=question))
-    message = Message(conversation_id=conversation.id, role="assistant", content=result.content, outcome=result.outcome, model=settings.embedding_model, prompt_version=semantic.VERSION, intent_id=result.intent_id, diagnostics=result.diagnostics, clarification=result.clarification)
+    message = Message(conversation_id=conversation.id, role="assistant", content=result.content, outcome=result.outcome, model=model, prompt_version=semantic.VERSION, intent_id=result.intent_id, diagnostics=result.diagnostics, clarification=result.clarification)
     db.add(message)
     db.flush()
     for index, (c, d, score, facts) in enumerate(result.sources, 1):

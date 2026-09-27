@@ -1,5 +1,7 @@
 # Architecture/refactor audit — checkpoint 6eee220
 
+Historical audit. Optional, quota-bound DeepSeek synthesis was added later; see design.md and verification.md for current behavior.
+
 The baseline is a React/Vite SPA and FastAPI modular monolith, with SQLAlchemy, PostgreSQL 17, pgvector 0.8.6, Alembic 0002, eight synthetic documents and 25 chunks. FastEmbed already provided real local 384-dimensional embeddings.
 
 External dependencies to remove: app/ai.py HTTP generation and embedding clients, provider keys and model configuration, the /chat generation call, provider fixture tests, the generation evaluation runner, and generation-specific documentation. Authentication, source snapshots, document ingestion/reindex/removal, relational history, ownership, feedback, analytics, and the frontend were reusable.

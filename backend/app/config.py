@@ -1,4 +1,6 @@
 from functools import lru_cache
+import os
+from typing import Literal
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -11,6 +13,7 @@ class Settings(BaseSettings):
     embedding_dimensions: int = Field(default=384, ge=384, le=384)
     database_pool_size: int = Field(default=2, ge=1, le=5)
     database_max_overflow: int = Field(default=1, ge=0, le=5)
+    database_pool_mode: Literal["queue", "null"] = "null" if os.getenv("VERCEL") == "1" else "queue"
     jwt_secret: str = Field(min_length=32)
     cors_origins: list[str] = ["http://localhost:5173"]
     chunk_tokens: int = Field(default=700, ge=100, le=1000)

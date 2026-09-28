@@ -14,7 +14,7 @@ TO-BE demonstration: ask a natural-language IT question, receive reviewed source
 
 React/Vite → FastAPI → server-side FastEmbed (384 dimensions) → PostgreSQL cosine similarity over positive/negative intent examples and mapped chunks → evidence gate → deterministic composer → optional single-call MindRouter paraphrase → validated backend citations.
 
-History, feedback, excerpts, vectors and daily reservations persist in PostgreSQL. Administrators manage documents; public guests have isolated bearer sessions. Neon + Render + Vercel is the prepared target, awaiting deployment and hosted acceptance.
+History, feedback, excerpts, vectors, request limits and daily reservations persist in PostgreSQL. Administrators manage documents; public guests have isolated bearer sessions. The deployment target is one Vercel Services project (Vite at `/`, FastAPI at `/api`) plus Neon. Hosted acceptance is pending; see [the current runbook](vercel-deployment.md).
 
 ## Engineering decisions and cost controls
 
@@ -23,11 +23,11 @@ History, feedback, excerpts, vectors and daily reservations persist in PostgreSQ
 - A supported answer remains available without a key. Unsupported questions do not invoke generation.
 - Atomic PostgreSQL quotas count attempts, including failures: 3/user, 8/IP, 20/global per UTC day; output is capped at 300 tokens. No retries, agents, rerankers or second-pass calls.
 - Fact-ID grammar is normalized and checked; public citations come from database metadata. Lexical grounding is conservative and heuristic, not semantic proof.
-- One worker, singleton model loading, serialized inference, batches of eight and a 2+1 connection pool target a small demo host.
+- Each warm function instance reuses a lazy singleton model with serialized inference. Assets are prepared at build time. Vercel uses NullPool to avoid retaining idle connections per instance; local Docker keeps its 2+1 pool.
 
 ## Limitations
 
-English-focused synthetic corpus; 18 curated intents; no OCR, enterprise SSO, retention automation or distributed ordinary request limits. Paraphrase checks can reject valid answers and cannot guarantee every conceivable unsupported claim is caught. The final paid call returned HTTP 200 but failed sentence formatting. That shape was corrected offline with no paid retry; real synthesis remains unverified. Free hosting may cold-start. Regression scores are not general language accuracy or a production SLA.
+English-focused synthetic corpus; 18 curated intents; no OCR, enterprise SSO or retention automation. Paraphrase checks can reject valid answers and cannot guarantee every conceivable unsupported claim is caught. The final paid call returned HTTP 200 but failed sentence formatting. That shape was corrected offline with no paid retry; real synthesis remains unverified. Serverless cold starts and free-tier usage limits remain constraints. Regression scores are not general language accuracy or a production SLA.
 
 ## CV bullets
 

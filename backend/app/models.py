@@ -121,3 +121,10 @@ class GenerationUsage(Base):
     scope: Mapped[str] = mapped_column(String(10), nullable=False)
     identity: Mapped[str] = mapped_column(String(64), nullable=False)
     count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class RequestLimit(Base):
+    __tablename__ = "request_limits"
+    identity: Mapped[str] = mapped_column(String(64), primary_key=True)
+    events: Mapped[list] = mapped_column(JSON, nullable=False)
+    expires_at: Mapped[float] = mapped_column(nullable=False, index=True)

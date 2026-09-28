@@ -39,7 +39,7 @@ export async function api<T>(
   let response: Response;
   try {
     response = await fetch(
-      `${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "")}${path}`,
+      `${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "/api")}${path}`,
       { ...options, headers, signal: options.signal ?? AbortSignal.timeout(120_000) },
     );
   } catch {

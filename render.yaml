@@ -1,4 +1,5 @@
-# Readiness template only. Creating services requires a separate deployment step.
+# ARCHIVED: not the production target. Use root vercel.json and docs/vercel-deployment.md.
+# Retained only as historical configuration; do not create a Render service.
 services:
   - type: web
     name: helpdesk-ai-api

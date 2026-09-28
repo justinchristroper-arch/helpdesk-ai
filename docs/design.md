@@ -22,7 +22,7 @@ When synthesis is eligible and MINDROUTER_API_KEY is configured, the backend ato
 
 Migration 0003 adds intent_examples, conversation context, detected intent, diagnostics, and clarification choices. Migration 0004 adds shared daily generation counters without rewriting the earlier corpus. Context records active intent/topic, recent documents, and recent query. MessageSource preserves actual title, page, section, chunk ID, excerpt and score.
 
-Anonymous visitors create a guest bearer session without registration; ownership checks isolate history/feedback. Tokens expire after eight hours and sessionStorage is scoped to the browser tab/session. Administrator credentials are separate; anonymous uploads are prohibited. The demo has process-local rate limits and should use one worker until distributed limits exist.
+Anonymous visitors create a guest bearer session without registration; ownership checks isolate history/feedback. Tokens expire after eight hours and sessionStorage is scoped to the browser tab/session. Administrator credentials are separate; anonymous uploads are prohibited. Request windows and generation quotas persist in PostgreSQL with transaction locks, so separate serverless instances share limits.
 
 ## Limits
 

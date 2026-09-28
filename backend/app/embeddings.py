@@ -19,6 +19,7 @@ def _cached_model():
     from fastembed import TextEmbedding
     return TextEmbedding(model_name=get_settings().embedding_model,
                          cache_dir=os.getenv("EMBEDDING_CACHE_DIR"),
+                         specific_model_path=os.getenv("EMBEDDING_MODEL_PATH"),
                          threads=2, local_files_only=True)
 
 

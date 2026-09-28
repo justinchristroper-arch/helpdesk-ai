@@ -4,7 +4,7 @@
 
 HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can paraphrase approved source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live synthesis path has not yet passed validation; deterministic answers remain available.
 
-Status: local retrieval and deterministic fallback verified. The Neon production database is also verified with TLS, pgvector, Alembic 0004, the synthetic seed corpus, real FastEmbed retrieval and local FastAPI persistence. Render and Vercel remain undeployed. The final one-call GPT-4.1 Nano test returned HTTP 200 but failed sentence formatting; a conservative local correction is tested, with no further paid call. Real synthesis remains optional/unverified. See the [deployment runbook](docs/deployment.md), [final pre-deployment report](docs/final-predeployment.md), and [verification history](docs/verification.md). Nothing is authorized for public publication.
+Status: local retrieval and deterministic fallback verified. The private GitHub repository is connected; production is being migrated to one Vercel Services project with a Vite frontend, FastAPI backend and the existing Neon database. Hosted acceptance is still pending. The last paid synthesis response failed validation; the subsequent correction was tested offline only. Real synthesis remains optional/unverified. See the [current Vercel deployment runbook](docs/vercel-deployment.md) and [verification history](docs/verification.md). Public repository publication is not authorized.
 
 ## Why this architecture
 
@@ -33,7 +33,7 @@ The Docker image downloads the embedding model and tokenizer at build time. Runt
 ## Verification
 
 - Backend: python -m pytest -q from backend; real seeded checks require LIVE_SEMANTIC=1 and TEST_DATABASE_URL.
-- Frontend: npm test, npm run lint, npm run build. Production builds require VITE_API_URL set to an HTTPS backend origin; use a placeholder HTTPS origin for compile-only local checks, or the actual Render origin for deployment.
+- Frontend: npm test, npm run lint, npm run build. Production defaults to same-origin `/api`; no frontend environment variable is needed on Vercel. Local development can still target the Docker API.
 - Browser: npm run test:e2e with local API/frontend running and ignored .demo-credentials.json for the admin test.
 - Real no-API fallback proof (explicitly clears the key): docker compose exec -T api python verify_offline.py.
 - Evaluation: docker compose exec -T api python -m app.evaluate.
@@ -44,8 +44,8 @@ The Docker image downloads the embedding model and tokenizer at build time. Runt
 
 See [dataset maintenance](docs/dataset-maintenance.md), [architecture](docs/design.md), [deployment](docs/deployment.md), [verification](docs/verification.md), and [case study](docs/case-study.md).
 
-Semantic coverage depends on curated examples and approved fact mappings. Uploaded documents become searchable in the library, but answer coverage requires a reviewed intent mapping; arbitrary uploads do not silently become authoritative answer templates. English-focused, no OCR, no enterprise identity/retention workflow. Generation reservations persist in PostgreSQL across workers; the ordinary request limits remain process-local. Exact quotation proves source membership, not that the matcher understood every possible question.
+Semantic coverage depends on curated examples and approved fact mappings. Uploaded documents become searchable in the library, but answer coverage requires a reviewed intent mapping; arbitrary uploads do not silently become authoritative answer templates. English-focused, no OCR, no enterprise identity/retention workflow. Generation reservations and ordinary request limits persist in PostgreSQL across instances. Exact quotation proves source membership, not that the matcher understood every possible question.
 
-Paraphrase grounding is a deterministic structural/lexical heuristic, not a guarantee of semantic correctness. Defaults are 3 generation attempts/user, 8/IP and 20 globally per UTC day, with at most one 300-token request per eligible question. Failed attempts count; there are no retries or answer-generation cache. Hosted proxy identity must be verified before claiming per-visitor IP behavior. The deployment target is Neon PostgreSQL, one Render Docker worker, and Vercel; [the runbook](docs/deployment.md) lists exact settings and pending hosted checks.
+Paraphrase grounding is a deterministic structural/lexical heuristic, not a guarantee of semantic correctness. Defaults are 3 generation attempts/user, 8/IP and 20 globally per UTC day, with at most one 300-token request per eligible question. Failed attempts count; there are no retries or answer-generation cache. Hosted proxy identity must be verified before claiming per-visitor IP behavior. Production targets Vercel + Neon; Docker Compose remains supported for local development. [The current runbook](docs/vercel-deployment.md) lists settings and pending hosted checks.
 
 Historical citations remain snapshots after a source is removed. Synthetic policy corpus only; do not enter confidential data. Screenshots labelled local are local verification evidence, not deployed portfolio screenshots.

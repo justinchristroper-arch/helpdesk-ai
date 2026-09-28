@@ -15,5 +15,7 @@ coverage/
 .DS_Store
 *.tsbuildinfo
 .tools/
+model-cache/
+tokenizer-cache/
 frontend/test-results/
 frontend/playwright-report/

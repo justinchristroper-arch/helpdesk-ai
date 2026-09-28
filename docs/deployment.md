@@ -1,4 +1,6 @@
-# Neon / Render / Vercel deployment runbook
+# Archived Neon / Render / Vercel deployment runbook
+
+**Superseded: do not deploy using the instructions below.** Render and Docker Hub production workflows were abandoned. Use [Vercel full-stack deployment](vercel-deployment.md). This file preserves the previous Neon validation checkpoint only.
 
 Prepared locally on 2026-09-28. The Neon database is provisioned and verified; Render and Vercel were not deployed, and nothing was pushed or published. This user-selected plan supersedes the former Railway target. Hosted acceptance remains required. Start with synthesis disabled: the latest single paid validation did not display a validated model answer.
 

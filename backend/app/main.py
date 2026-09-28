@@ -17,6 +17,7 @@ from app.config import get_settings
 from app.db import get_db
 from app.ingestion import InvalidDocument, chunk, extract
 from app.limits import limit
+from app.client_ip import client_ip
 from app.models import Chunk, Conversation, Document, Feedback, Message, MessageSource, User, now
 
 settings = get_settings()
@@ -62,7 +63,7 @@ def health(db: Session = Depends(get_db)):
 
 @app.post("/auth/guest", status_code=201)
 def guest(request: Request, db: Session = Depends(get_db)):
-    limit("guest:" + (request.client.host if request.client else "unknown"), 15)
+    limit("guest:" + client_ip(request), 15)
     user = User(email=f"guest-{uuid4().hex}@demo.invalid", password_hash="!", role="guest")
     db.add(user)
     db.commit()
@@ -71,7 +72,7 @@ def guest(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/auth/login")
 def login(body: Login, request: Request, db: Session = Depends(get_db)):
-    limit("login:" + (request.client.host if request.client else "unknown"), 10)
+    limit("login:" + client_ip(request), 10)
     user = db.scalar(select(User).where(User.email == body.email.lower().strip()))
     if not user or user.role == "guest" or not passwords.verify(body.password, user.password_hash):
         raise HTTPException(401, "Invalid email or password.")
@@ -171,7 +172,7 @@ def chat(body: Question, request: Request, user: User = Depends(current_user), d
     result = semantic.answer(db, question, conversation.context if conversation else None)
     model = settings.embedding_model
     if generation.should_synthesize(result, question):
-        synthesis = generation.synthesize(question, result, user.id, request.client.host if request.client else "unknown")
+        synthesis = generation.synthesize(question, result, user.id, client_ip(request))
         result.diagnostics["generation"] = synthesis.diagnostics()
         if synthesis.answer:
             result.content = synthesis.answer

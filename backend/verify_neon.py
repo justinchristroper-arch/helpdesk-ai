@@ -23,7 +23,7 @@ from app.semantic import answer
 EXPECTED_TABLES = {
     "alembic_version", "users", "documents", "document_chunks",
     "conversations", "messages", "message_sources", "feedback",
-    "intent_examples", "generation_usage",
+    "intent_examples", "generation_usage", "request_limits",
 }
 EXPECTED_COLUMNS = {
     "users": {"id", "email", "password_hash", "role", "created_at"},
@@ -40,6 +40,7 @@ EXPECTED_COLUMNS = {
                         "page_number", "excerpt", "relevance_score", "citation_number"},
     "feedback": {"id", "message_id", "user_id", "rating", "note", "created_at"},
     "generation_usage": {"id", "day", "scope", "identity", "count"},
+    "request_limits": {"identity", "events", "expires_at"},
 }
 QUESTIONS = [
     ("How do I request VPN access?", "vpn-access-policy.md"),

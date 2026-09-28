@@ -1,0 +1,12 @@
+.env
+.env.*
+**/.env
+**/.env.*
+.tools
+.git
+**/node_modules
+**/dist
+**/__pycache__
+**/.pytest_cache
+.demo-credentials.json
+.deployment-secrets.json

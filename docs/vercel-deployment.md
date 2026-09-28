@@ -17,7 +17,7 @@ Production browser requests default to relative `/api`; leave `VITE_API_URL` uns
 
 ## Assets and build
 
-Python 3.12 is selected by `backend/.python-version`. Runtime requirements use the existing lock as constraints, with pytest separated into `requirements-dev.txt`. Backend build command: `python prepare_assets.py`. It downloads the same pinned quantized ONNX snapshot used in the Docker baseline, materializes one copy of the five runtime files, prepares tiktoken, and verifies a 384-dimensional embedding. The build requires public Hugging Face access but no API key, database connection, migration, bootstrap or LLM request.
+Python 3.12 is selected by `backend/.python-version`. Runtime requirements flatten the existing lock's runtime pins, with pytest separated into `requirements-dev.txt`. The first hosted build rejected the nested constraints file before dependency installation. Backend build command: `python prepare_assets.py`. It downloads the same pinned quantized ONNX snapshot used in the Docker baseline, materializes one copy of the five runtime files, prepares tiktoken, and verifies a 384-dimensional embedding. The build requires public Hugging Face access but no API key, database connection, migration, bootstrap or LLM request.
 
 Runtime uses the packaged model via FastEmbed's `specific_model_path`, `local_files_only=True`, and `HF_HUB_OFFLINE=1`. The small temporary cache directory is disposable. No user state is stored there. Model initialization is lazy and serialized; warm reuse is per instance, not a guarantee across requests. Each new instance still pays model import/loading cost. No model is downloaded in the browser or during a public request.
 

@@ -4,7 +4,7 @@
 
 HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can paraphrase approved source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live synthesis path has not yet passed validation; deterministic answers remain available.
 
-Status: local retrieval and deterministic fallback verified. The final one-call GPT-4.1 Nano test returned HTTP 200 but failed sentence formatting; a conservative local correction is tested, with no further paid call. Real synthesis remains optional/unverified. See the [final pre-deployment report](docs/final-predeployment.md) and [verification history](docs/verification.md). Nothing is deployed or authorized for public publication.
+Status: local retrieval and deterministic fallback verified. The Neon production database is also verified with TLS, pgvector, Alembic 0004, the synthetic seed corpus, real FastEmbed retrieval and local FastAPI persistence. Render and Vercel remain undeployed. The final one-call GPT-4.1 Nano test returned HTTP 200 but failed sentence formatting; a conservative local correction is tested, with no further paid call. Real synthesis remains optional/unverified. See the [deployment runbook](docs/deployment.md), [final pre-deployment report](docs/final-predeployment.md), and [verification history](docs/verification.md). Nothing is authorized for public publication.
 
 ## Why this architecture
 

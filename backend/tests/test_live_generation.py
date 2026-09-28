@@ -45,19 +45,27 @@ def test_persisted_user_and_ip_daily_limits(monkeypatch):
 
 def test_global_daily_limit_blocks_all_users(monkeypatch):
     day = datetime.now(timezone.utc).date()
+    limit = 1
     with Session.begin() as db:
         row = db.scalar(select(GenerationUsage).where(GenerationUsage.day == day,
             GenerationUsage.scope == "global", GenerationUsage.identity == "all"))
         original = row.count if row else None
         if row is None:
-            db.add(GenerationUsage(day=day, scope="global", identity="all", count=1))
+            db.add(GenerationUsage(day=day, scope="global", identity="all", count=limit))
+        else:
+            limit = max(row.count, 1)
+            row.count = limit
     try:
         monkeypatch.setattr(generation, "get_settings", lambda: Settings(
             _env_file=None, jwt_secret="test-secret-with-at-least-32-characters",
-            generation_global_daily_limit=max(original or 0, 1)))
+            generation_global_daily_limit=limit))
         assert not generation.reserve(str(uuid4()), str(uuid4()))
     finally:
-        if original is None:
-            with Session.begin() as db:
+        with Session.begin() as db:
+            if original is None:
                 db.execute(delete(GenerationUsage).where(GenerationUsage.day == day,
                     GenerationUsage.scope == "global", GenerationUsage.identity == "all"))
+            else:
+                row = db.scalar(select(GenerationUsage).where(GenerationUsage.day == day,
+                    GenerationUsage.scope == "global", GenerationUsage.identity == "all"))
+                row.count = original

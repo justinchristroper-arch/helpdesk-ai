@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,6 +33,21 @@ class Settings(BaseSettings):
     generation_user_daily_limit: int = Field(default=3, ge=1, le=100)
     generation_ip_daily_limit: int = Field(default=8, ge=1, le=500)
     generation_global_daily_limit: int = Field(default=20, ge=1, le=10000)
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url(cls, value):
+        """Select psycopg3 explicitly while preserving credentials and SSL options."""
+        if not isinstance(value, str):
+            raise ValueError("DATABASE_URL must be a PostgreSQL URL")
+        value = value.strip()
+        if value.startswith("postgresql://"):
+            return "postgresql+psycopg://" + value.removeprefix("postgresql://")
+        if value.startswith("postgres://"):
+            return "postgresql+psycopg://" + value.removeprefix("postgres://")
+        if not value.startswith("postgresql+psycopg://"):
+            raise ValueError("DATABASE_URL must use PostgreSQL with psycopg3")
+        return value
 
 
 @lru_cache

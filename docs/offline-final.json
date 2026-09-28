@@ -1,0 +1,1 @@
+{"passed": true, "external_socket_attempts": 0, "api_keys_present": false, "cold_api_flow_seconds": 25.791, "checks": ["guest", "answer", "citations", "feedback", "history", "fallback", "followup", "multisource_no_key", "complex_no_key"]}

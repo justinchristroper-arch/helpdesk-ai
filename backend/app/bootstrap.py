@@ -38,6 +38,7 @@ def seed(db):
 if __name__ == "__main__":
     with Session() as db:
         email, password = os.getenv("BOOTSTRAP_ADMIN_EMAIL"), os.getenv("BOOTSTRAP_ADMIN_PASSWORD")
+        email = email.strip().lower() if email else None
         if email and password and not db.scalar(select(User).where(User.email == email)):
             if len(password) < 12:
                 raise ValueError("Bootstrap admin password must be at least 12 characters")

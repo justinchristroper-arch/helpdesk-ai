@@ -4,7 +4,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from app.config import get_settings
 from app.embeddings import embed
 from app.models import IntentExample
@@ -30,7 +30,7 @@ def dataset():
 def index_intents(db):
     intents, digest = dataset()
     model = get_settings().embedding_model
-    existing = {r.id: r for r in db.scalars(select(IntentExample))}
+    existing = set(db.scalars(select(IntentExample.id)))
     pending, keep = [], set()
     for ident, item in intents.items():
         for negative, texts in ((False, [item["canonical_question"], *item["paraphrases"]]), (True, item["negative_examples"])):
@@ -39,8 +39,8 @@ def index_intents(db):
                 keep.add(key)
                 if key not in existing:
                     pending.append(dict(id=key, intent_id=ident, content=content, negative=negative, embedding_model=model, dataset_hash=digest))
-                else:
-                    existing[key].dataset_hash = digest
+    if existing & keep:
+        db.execute(update(IntentExample).where(IntentExample.id.in_(existing & keep)).values(dataset_hash=digest))
     if pending:
         for record, vector in zip(pending, embed([r["content"] for r in pending]), strict=True):
             db.add(IntentExample(**record, embedding=vector))

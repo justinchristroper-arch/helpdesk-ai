@@ -26,4 +26,10 @@ Anonymous visitors create a guest bearer session without registration; ownership
 
 ## Limits
 
+Fact-marker normalization accepts comma-separated or adjacent IDs, Markdown bold/parentheses, trailing punctuation and list prefixes. Multiple separately cited sentences on one line are split only after complete marker groups; uncited statements still fail. Each cited fact must overlap the factual segment, sensitive values/terms and negation are checked, all source coverage is required, and active chunk membership is rechecked. Truncated completions (`finish_reason=length`) are rejected. This is a conservative heuristic: it does not certify semantic entailment.
+
+The latest live test and offline formatting correction are documented in [final pre-deployment](final-predeployment.md). It would be incorrect to infer real synthesis success from HTTP 200 or offline fixtures alone. Analytics distinguishes deterministic and synthesized answered messages using stored generation state; fallback and clarification remain separate. Public responses expose only a small safe synthesis status, not provider diagnostics.
+
+Deployment uses a locked lazy singleton embedding model, serialized inference, batches of eight, one worker and a 2+1 database pool. Intent indexing reads existing IDs instead of all stored vectors. The health endpoint checks storage without loading the model or using an external provider.
+
 Narrow English synthetic corpus, curated source mappings, no arbitrary long-form generation, no guarantee of semantic correctness on unseen queries. Quote validity is measurable but is not independent entailment assessment. Hosting, database retention and operational costs still apply.

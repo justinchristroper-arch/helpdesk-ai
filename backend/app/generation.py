@@ -1,11 +1,12 @@
 """Optional, quota-bound MindRouter synthesis with backend-owned citations."""
 import hashlib
 import re
+import unicodedata
 from datetime import datetime, timezone
 from dataclasses import dataclass
 
 import httpx
-from sqlalchemy import select, text
+from sqlalchemy import select, text, tuple_
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import get_settings
@@ -14,7 +15,9 @@ from app.models import Chunk, Document, GenerationUsage
 
 
 MAX_SYNTHESIS_CHARS = 2400
-MARKER_RE = re.compile(r"\[(F\d+(?:\s*,\s*F\d+)*)\]\s*$")
+FACT_MARKER = r"\[F[1-9][0-9]*(?:\s*,\s*F[1-9][0-9]*)*\]"
+WRAPPED_MARKER = rf"(?:\*\*{FACT_MARKER}\*\*|\({FACT_MARKER}\)|{FACT_MARKER})"
+MARKER_RE = re.compile(rf"(?P<markers>{WRAPPED_MARKER}(?:\s*,?\s*{WRAPPED_MARKER})*)\s*[.!]?\s*$")
 NUMBER_RE = re.compile(r"(?<![A-Za-z])\d+(?:[.,]\d+)*(?![A-Za-z])")
 URL_RE = re.compile(r"(?i)\b(?:https?://|www\.)\S+")
 EMAIL_RE = re.compile(r"(?i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b")
@@ -34,6 +37,18 @@ POLICY_TERMS = {"administrator", "allow", "approval", "approve", "approved", "au
                 "guaranteed", "hr", "immediately", "ineligible", "legal", "manager", "mandatory", "must",
                 "permission", "policy", "priority", "prohibited", "rejected", "require", "security",
                 "severity", "sla", "status", "supervisor", "urgent", "waiver"}
+SENSITIVE_TERMS = POLICY_TERMS | {
+    "after", "unless", "without", "not", "never", "no", "cannot", "don't", "doesn't",
+    "free", "cost", "dollar", "dollars", "percent", "percentage", "refund", "reimburse",
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "fifteen", "twenty", "thirty", "hundred", "thousand", "unlimited",
+    "install", "uninstall", "delete", "download", "reinstall", "restart", "reboot",
+    "transfer", "pay", "payment", "purchase", "certificate", "registry", "handbook",
+    "manual", "contract", "finance", "payroll", "ceo", "director", "override",
+    "eleven", "twelve", "thirteen", "fourteen", "sixteen", "seventeen", "eighteen",
+    "nineteen", "forty", "fifty", "sixty", "seventy", "eighty", "ninety", "million",
+    "guide", "protocol",
+}
 
 
 @dataclass(frozen=True)
@@ -97,6 +112,9 @@ def sanitized_shape(data, choice=None):
         "content_nonempty": bool(content) if isinstance(content, str) else False,
         "reasoning_type": type(reasoning).__name__,
         "reasoning_length": len(reasoning) if isinstance(reasoning, str) else None,
+        # Formatting only: never persist rejected prose or hidden reasoning.
+        "line_shapes": [re.sub(r"[^\[\](),.*!\s]", "x", line)[-160:]
+                        for line in content.splitlines()[:20]] if isinstance(content, str) else [],
     }
 
 
@@ -132,7 +150,9 @@ def reserve(user_id: str, ip: str) -> bool:
             # across processes. Commit happens before the network request.
             db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": 751000000 + day.toordinal()})
             rows = {(r.scope, r.identity): r for r in db.scalars(
-                select(GenerationUsage).where(GenerationUsage.day == day)).all()}
+                select(GenerationUsage).where(GenerationUsage.day == day,
+                    tuple_(GenerationUsage.scope, GenerationUsage.identity).in_(
+                        [(scope, identity) for scope, identity, _ in checks]))).all()}
             if any(rows.get((scope, identity)) and rows[(scope, identity)].count >= maximum
                    for scope, identity, maximum in checks):
                 return False
@@ -169,10 +189,22 @@ def unsupported_values(sentence: str, evidence: str) -> str | None:
         supplied = {match.group(0).lower() for match in pattern.finditer(sentence)}
         if not supplied.issubset(allowed):
             return f"unsupported_{name}"
-    sentence_terms = normalized_tokens(sentence) & POLICY_TERMS
+    sentence_terms = normalized_tokens(sentence) & SENSITIVE_TERMS
     evidence_terms = normalized_tokens(evidence)
     if not sentence_terms.issubset(evidence_terms):
         return "unsupported_policy_term"
+    negations = {"not", "never", "no", "cannot", "don't", "doesn't", "without"}
+    if evidence_terms & negations and not normalized_tokens(sentence) & negations:
+        return "lost_negation"
+    if any(symbol in sentence and symbol not in evidence for symbol in "$£€¥%"):
+        return "unsupported_value"
+    evidence_words = {word.lower() for word in TOKEN_RE.findall(evidence)}
+    for index, word in enumerate(TOKEN_RE.findall(sentence)):
+        # Conservative named-entity check; introductory words are not entities.
+        if word[0].isupper() and word.lower() not in evidence_words:
+            if index == 0 and word.lower() in STOPWORDS | {"first", "next", "please", "confirm", "check", "verify", "ensure"}:
+                continue
+            return "unsupported_entity"
     return None
 
 
@@ -182,6 +214,12 @@ def validate_grounded_content(content: str, facts: list[ApprovedFact]) -> Ground
         return GroundingResult(None, [], "empty_content")
     if len(content) > MAX_SYNTHESIS_CHARS:
         return GroundingResult(None, [], "content_too_long")
+    if any(unicodedata.category(char) in {"Cf", "Cs", "Cc"} and char not in "\n\r\t" for char in content):
+        return GroundingResult(None, [], "invalid_unicode")
+    # A provider may ignore newlines: split only AFTER complete issued-style
+    # marker groups. Uncited sentences within a segment still fail below.
+    content = re.sub(rf"({WRAPPED_MARKER}(?:\s*,?\s*{WRAPPED_MARKER})*\s*[.!]?)\s+(?=[A-Za-z0-9•-])",
+                     r"\1\n", content)
     allowed = {fact.fact_id: fact for fact in facts}
     rendered, referenced = [], []
     for raw_line in content.splitlines():
@@ -193,9 +231,10 @@ def validate_grounded_content(content: str, facts: list[ApprovedFact]) -> Ground
             reason = "malformed_fact_marker" if "[" in line or "]" in line else "sentence_without_fact_id"
             return GroundingResult(None, referenced, reason)
         sentence = line[:match.start()].strip()
-        if not sentence or "[" in sentence or "]" in sentence or MULTI_SENTENCE_RE.search(sentence):
+        if (not sentence or "[" in sentence or "]" in sentence or MULTI_SENTENCE_RE.search(sentence)
+                or sentence.count("**") % 2 or sentence.count("(") != sentence.count(")")):
             return GroundingResult(None, referenced, "malformed_sentence")
-        fact_ids = [item.strip() for item in match.group(1).split(",")]
+        fact_ids = re.findall(r"F[1-9][0-9]*", match.group("markers"))
         referenced.extend(fact_ids)
         if len(set(fact_ids)) != len(fact_ids) or any(fact_id not in allowed for fact_id in fact_ids):
             return GroundingResult(None, referenced, "unknown_or_duplicate_fact_id")
@@ -205,8 +244,10 @@ def validate_grounded_content(content: str, facts: list[ApprovedFact]) -> Ground
             return GroundingResult(None, referenced, unsupported)
         sentence_tokens, evidence_tokens = normalized_tokens(sentence), normalized_tokens(evidence)
         overlap = sentence_tokens & evidence_tokens
-        if len(overlap) < 2 or (sentence_tokens and len(overlap) / len(sentence_tokens) < 0.35):
+        if len(overlap) < 2 or (sentence_tokens and len(overlap) / len(sentence_tokens) < 0.55):
             return GroundingResult(None, referenced, "insufficient_fact_overlap")
+        if any(len(sentence_tokens & normalized_tokens(allowed[fact_id].text)) < 2 for fact_id in fact_ids):
+            return GroundingResult(None, referenced, "unrelated_fact_reference")
         citations = []
         for fact_id in fact_ids:
             citation = allowed[fact_id].citation_number
@@ -231,7 +272,8 @@ def evidence_is_active(facts: list[ApprovedFact]) -> bool:
                 chunk = db.get(Chunk, fact.chunk_id)
                 document = db.get(Document, fact.document_id)
                 if (not chunk or not document or document.status != "ready" or
-                        chunk.document_id != document.id or chunk.content != fact.chunk_content):
+                        chunk.document_id != document.id or chunk.content != fact.chunk_content or
+                        fact.text not in chunk.content):
                     return False
         return True
     except SQLAlchemyError:
@@ -239,7 +281,7 @@ def evidence_is_active(facts: list[ApprovedFact]) -> bool:
 
 
 def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
-    """One MindRouter call selects verbatim facts; all displayed facts come from DB."""
+    """One MindRouter call paraphrases approved facts with backend-owned citations."""
     settings = get_settings()
     key = settings.mindrouter_api_key.get_secret_value() if settings.mindrouter_api_key else ""
     if not key:
@@ -274,6 +316,8 @@ def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
             status = response.status_code
             response.raise_for_status()
             data = response.json()
+        if not isinstance(data, dict):
+            raise ValueError("Invalid response object")
         usage = data.get("usage") or {}
         if isinstance(usage, dict):
             input_tokens = usage.get("prompt_tokens") if type(usage.get("prompt_tokens")) is int else None
@@ -284,8 +328,11 @@ def synthesize(question: str, result, user_id: str, ip: str) -> SynthesisResult:
         response_model = data.get("model") if isinstance(data.get("model"), str) else None
         choice = data["choices"][0]
         shape = sanitized_shape(data, choice)
+        if not isinstance(choice, dict) or not isinstance(choice.get("message"), dict):
+            return SynthesisResult(None, "invalid_response", called=True, http_status=status,
+                                   validation_reason="invalid_message_shape", response_shape=shape)
         finish_reason = choice.get("finish_reason")
-        if finish_reason not in {"stop", "length"}:
+        if finish_reason != "stop":
             return SynthesisResult(None, "invalid_response", called=True, http_status=status,
                                    input_tokens=input_tokens, output_tokens=output_tokens,
                                    reasoning_tokens=reasoning_tokens, response_model=response_model,

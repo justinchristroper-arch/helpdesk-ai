@@ -1,0 +1,35 @@
+# Readiness template only. Creating services requires a separate deployment step.
+services:
+  - type: web
+    name: helpdesk-ai-api
+    runtime: docker
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: MINDROUTER_API_KEY
+        sync: false
+      - key: MINDROUTER_BASE_URL
+        value: https://api.mindrouter.io/v1
+      - key: MINDROUTER_MODEL
+        value: openai/gpt-4.1-nano
+      - key: MINDROUTER_MAX_OUTPUT_TOKENS
+        value: "300"
+      - key: GENERATION_USER_DAILY_LIMIT
+        value: "3"
+      - key: GENERATION_IP_DAILY_LIMIT
+        value: "8"
+      - key: GENERATION_GLOBAL_DAILY_LIMIT
+        value: "20"
+      - key: DATABASE_POOL_SIZE
+        value: "2"
+      - key: DATABASE_MAX_OVERFLOW
+        value: "1"

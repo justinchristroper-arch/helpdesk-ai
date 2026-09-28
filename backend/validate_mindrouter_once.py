@@ -1,7 +1,6 @@
 """Exactly one final HelpDesk synthesis request after local payload correction."""
 import json
 import os
-import re
 from unittest.mock import patch
 
 import httpx
@@ -9,6 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app.config import get_settings
+from app.generation import sanitized_error_shape
 from app.db import Session
 from app.main import app
 from app.models import Chunk, Document, Message, MessageSource
@@ -17,6 +17,8 @@ if os.getenv("RUN_ONE_MINDROUTER_VALIDATION") != "1":
     raise SystemExit("Set RUN_ONE_MINDROUTER_VALIDATION=1 to authorize exactly one final call.")
 
 settings = get_settings()
+if settings.mindrouter_model != "openai/gpt-4.1-nano" or settings.mindrouter_max_output_tokens != 300:
+    raise SystemExit("Validation requires GPT-4.1 Nano and a 300-token ceiling.")
 external_calls = 0
 safe_http_error = None
 original_post = httpx.Client.post
@@ -26,22 +28,14 @@ url = settings.mindrouter_base_url.rstrip("/") + "/chat/completions"
 def counted_post(self, target, *args, **kwargs):
     global external_calls, safe_http_error
     if str(target) == url:
+        if external_calls >= 1:
+            raise RuntimeError("One-call validation budget exhausted")
+        if set(kwargs.get("json", {})) != {"model", "messages", "max_tokens"}:
+            raise RuntimeError("Unexpected generation request fields")
         external_calls += 1
     response = original_post(self, target, *args, **kwargs)
     if str(target) == url and not response.is_success:
-        try:
-            data = response.json()
-            error = data.get("error") if isinstance(data, dict) else None
-            message = error.get("message") if isinstance(error, dict) else None
-            if isinstance(message, str):
-                key = settings.mindrouter_api_key.get_secret_value() if settings.mindrouter_api_key else ""
-                message = message.replace(key, "[REDACTED]") if key else message
-                message = re.sub(r"sk_[A-Za-z0-9_-]{10,}", "[REDACTED]", message)[:500]
-            safe_http_error = {"type": error.get("type") if isinstance(error, dict) else None,
-                               "code": error.get("code") if isinstance(error, dict) else None,
-                               "message": message}
-        except ValueError:
-            safe_http_error = {"body_type": "non_json", "body_length": len(response.content)}
+        safe_http_error = sanitized_error_shape(response)
     return response
 
 

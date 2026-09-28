@@ -1,25 +1,90 @@
-# Deployment runbook
+# Neon / Render / Vercel deployment runbook
 
-Frontend target: Vercel. The original isolated Railway deployment is blocked by the account's free resource provisioning limit. The user requested evaluation of free alternatives before migration; see [hosting assessment](hosting-options.md). No alternative resources or app deployments have been created. Vercel is linked only. No GitHub push is required. Optional MindRouter credentials remain backend-only.
+Prepared locally on 2026-09-28. Nothing was provisioned, pushed, published or deployed in this pass. This user-selected plan supersedes the former Railway target. Hosted acceptance remains required. Start with synthesis disabled: the latest single paid validation did not display a validated model answer.
 
-## Backend
+## Neon
 
-Build from backend using its Dockerfile/railway.toml. The model and tokenizer download during build; the resulting model cache was approximately 65 MB locally. Runtime uses local files only. Startup applies migrations, seeds bundled demo documents only for a new library, and idempotently indexes intents.
+Create a dedicated demo database in a region near Render. Use a direct connection for this small single-instance application, especially for Alembic. Copy the connection string into the backend secret environment, change its driver prefix to `postgresql+psycopg://`, and preserve Neon SSL/channel-binding options. Percent-encode special characters in credentials. Do not put credentials in commands or source files.
 
-Use PostgreSQL with pgvector, persistent storage, private networking and DATABASE_URL in postgresql+psycopg format. Configure JWT_SECRET and exact CORS_ORIGINS. Set optional MINDROUTER_API_KEY only in the backend environment; never place it in frontend variables or the image. MINDROUTER_BASE_URL and MINDROUTER_MODEL are backend environment settings. Use one API worker until ordinary request limits are shared. Verify extension and revision 0004 in the hosted database. PostgreSQL generation counters already work across workers.
+```dotenv
+DATABASE_URL=postgresql+psycopg://USER:PASSWORD@NEON_HOST/neondb?sslmode=require&channel_binding=require
+```
 
-Railway could not provision a project, so its hosted pgvector image has not been tested. This is a quota blocker, not a pgvector failure. Neon and Supabase have been evaluated as alternatives; no switch has been made.
+Neon requires no frontend variables. Enable `vector`, or allow migration 0001 to run `CREATE EXTENSION IF NOT EXISTS vector`. With the backend image and secret environment, run `alembic upgrade head`, `alembic current` and `alembic check`. Expected head: `0004`. Do not reset an existing database to deploy.
 
-## Cost feasibility
+Startup seeds only an empty library with eight synthetic documents and indexes 18 intents / 234 examples. Existing libraries are preserved. Verify 25 chunks and `vector_dims(embedding)=384` in both vector tables. The legacy chunk column is unbounded `vector`, with dimensions enforced by the embedding adapter; intent examples use `vector(384)`. No schema rewrite is needed. History, feedback and generation counters also persist in PostgreSQL.
 
-Earlier local warm API measurement was approximately 290 MiB RAM, PostgreSQL approximately 35 MiB. The current full in-process offline API test completed in 1.355 seconds with a loaded container; this is not a hosted cold-start SLA. Under a separate 512 MB/0.1 CPU local container limit, the cold flow took 22.794 seconds and peak process RSS was about 338 MiB. Model download is a build-time cost, not a browser action.
+Reference: [Neon pgvector](https://neon.com/docs/extensions/pgvector). Local PostgreSQL/pgvector is verified; a Neon TLS connection is not yet verified.
 
-Railway account inspection found an active trial with approximately $4.83 credit and 28 days left. Current Railway documentation lists a Free allowance of $1/month and 0.5 GB RAM per service. Continuous operation of API and DB may exceed that credit; no indefinite-free hosting claim is made. Do not upgrade or add a paid plan without approval.
+## Render backend
 
-Sources checked: https://docs.railway.com/pricing/plans and https://railway.com/pricing. Actual hosted usage must be measured after deployment.
+The root `render.yaml` is a readiness template with automatic deploys off. It builds `backend/Dockerfile` with `backend` as context. A Git-linked service requires a separately authorized private repository push; public publication is not needed. A separately authorized private registry image is another option. No remote was created here.
 
-## Frontend and acceptance
+Build: Render builds the Dockerfile; local equivalent is `docker build -t helpdesk-ai-api backend`. Pinned dependencies, model and tokenizer are downloaded at build time. The model cache is baked into the image. Docker excludes `.env` and `.env.*`; never pass keys as build arguments. Leave Docker Command empty to use:
 
-Deploy frontend with VITE_API_URL set to the public HTTPS API origin. Set exact production/preview origins in backend CORS. Test as a fresh anonymous visitor: supported and paraphrased questions, undocumented details, ambiguity, follow-up, multi-source citations, feedback, refresh/history, library, mobile, direct routes, console/API errors and docs. Verify admin controls separately and ensure no secrets in bundles.
+```sh
+alembic upgrade head && python -m app.bootstrap && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
+```
 
-Capture actual deployed screenshots only after successful hosted tests. Run final tests/lint/build/migrations/secret scan/Git status. Keep GitHub unpublished until explicitly authorized.
+Required backend environment:
+
+```dotenv
+DATABASE_URL=postgresql+psycopg://USER:PASSWORD@NEON_HOST/neondb?sslmode=require&channel_binding=require
+JWT_SECRET=REPLACE_WITH_AT_LEAST_32_RANDOM_CHARACTERS
+CORS_ORIGINS=["https://YOUR_FRONTEND.vercel.app"]
+```
+
+Recommended explicit values (also application defaults):
+
+```dotenv
+EMBEDDING_MODEL=BAAI/bge-small-en-v1.5
+EMBEDDING_DIMENSIONS=384
+DATABASE_POOL_SIZE=2
+DATABASE_MAX_OVERFLOW=1
+MINDROUTER_API_KEY=
+MINDROUTER_BASE_URL=https://api.mindrouter.io/v1
+MINDROUTER_MODEL=openai/gpt-4.1-nano
+MINDROUTER_MAX_OUTPUT_TOKENS=300
+GENERATION_USER_DAILY_LIMIT=3
+GENERATION_IP_DAILY_LIMIT=8
+GENERATION_GLOBAL_DAILY_LIMIT=20
+```
+
+Render supplies `PORT`. The image supplies `HF_HUB_OFFLINE=1`, `EMBEDDING_CACHE_DIR=/app/model-cache` and `TIKTOKEN_CACHE_DIR=/app/tokenizer-cache`. No external embedding key is needed. Set the optional MindRouter key only as a backend secret when separately authorized; an empty key preserves deterministic operation.
+
+Optional initial admin: privately set `BOOTSTRAP_ADMIN_EMAIL=admin@example.invalid` and `BOOTSTRAP_ADMIN_PASSWORD=REPLACE_WITH_A_UNIQUE_12_OR_MORE_CHARACTER_PASSWORD`. Verify login, then remove both. Bootstrap does not rotate existing passwords. Never include credentials in portfolio screenshots.
+
+Health route `/health` checks PostgreSQL without loading the model or calling MindRouter. Empty-database bootstrap does embed the seed corpus, so measure startup duration. Runtime uses a lazy singleton model, serialized embedding calls, batches of eight, one worker and a 2+1 DB pool. Do not add workers on 512 MB. PostgreSQL ranks vectors; index maintenance reads IDs rather than every vector.
+
+IP quotas use `request.client.host`. Preserve restrictive Uvicorn proxy defaults until the actual Render forwarding chain is verified. Do not blindly trust X-Forwarded-For or set `FORWARDED_ALLOW_IPS=*`. If only a proxy address is visible, visitors conservatively share the eight-attempt allowance. Verify visitor separation and spoof resistance during hosted acceptance before claiming hosted per-client enforcement. The global cap remains persistent. Ordinary request limits are process-local; use one worker.
+
+Render Free can sleep after 15 idle minutes and take about a minute to wake. Local files are ephemeral; persistent app state lives in Neon. Free usage has limits and is not a production SLA. Check account allowances before creating resources. References: [Free services](https://render.com/docs/free), [Blueprint fields](https://render.com/docs/blueprint-spec). See `resource-final.json` for local measurements, not hosted capacity claims.
+
+## Vercel frontend
+
+Root: `frontend`. Framework: Vite. Install: `npm ci`. Build: `npm run build`. Output: `dist`. The only required frontend environment variable is public:
+
+```dotenv
+VITE_API_URL=https://YOUR_BACKEND.onrender.com
+```
+
+Use an HTTPS origin without a trailing slash, credentials, path, query or fragment. Production builds reject an absent, non-HTTPS or loopback URL. Never put JWT, database, admin or MindRouter secrets in VITE variables. Set backend CORS to exact frontend origins; authorize individual previews without wildcards. SPA rewrites in `frontend/vercel.json` support refresh/direct routes. Reference: [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite).
+
+The local production build uses `https://helpdesk-api.example.invalid` solely to verify compilation and secret exclusion. Rebuild with the actual Render origin before deployment.
+
+## Hosted acceptance before publication
+
+After separate authorization: create Neon; deploy Render with key empty; verify migrations/seed/health; deploy Vercel with actual API origin; set exact CORS. Test anonymous chat, supported topics, unsupported/ambiguous input, pronoun follow-up, history/refresh, citations against current chunks, feedback, library, admin upload/reindex/removal, analytics, direct routes, mobile, API docs, CORS rejection and bundle secrecy. Measure cold starts, memory and proxy identity. Any new paid validation requires a new explicit call allowance.
+
+Capture real hosted screenshots only after these checks. Local images stay labelled local. Re-run tests, migrations and secret scan, then prepare public GitHub only with explicit authorization. No hosted success is claimed.
+
+## Local regression with paid synthesis disabled
+
+```sh
+docker compose -f docker-compose.yml -f compose.offline.yml -f compose.feasibility.yml up -d --build
+docker compose exec -T api python verify_offline.py
+docker compose exec -T api python verify_resources.py
+docker compose exec -T api python -m app.evaluate
+```
+
+The feasibility overlay applies 512 MB and 0.1 CPU. Run memory-heavy in-process checks sequentially in a fresh key-disabled container, before its web worker has loaded the model. Never run two model processes inside a 512 MB container. Never delete volumes for routine testing.

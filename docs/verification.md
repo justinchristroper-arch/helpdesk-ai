@@ -1,5 +1,9 @@
 # Verification record
 
+**Latest checkpoint (2026-09-28):** [final pre-deployment report](final-predeployment.md) supersedes the status/counts below. The chosen deployment target is now Neon + Render + Vercel, but no deployment or publication has occurred. Exactly one paid call in the final pass returned HTTP 200, 246 input / 57 output tokens, zero reasoning tokens and a normal stop; sentence-format validation failed. An offline inline-marker correction was added without a paid retry, so real synthesis remains unverified. Earlier provider experiments below are retained only as history; their scripts and Railway runtime config were removed.
+
+## Historical checkpoints
+
 Local architecture checkpoint, 2026-09-27. Hosted verification is blocked by Railway's free resource provisioning limit. The user requested a free-hosting assessment before migration; see [hosting options](hosting-options.md). Vercel is linked but not deployed. GitHub publication is not authorized.
 
 - Real PostgreSQL 17.11 and pgvector 0.8.6; Alembic 0004 applied with no pending model/schema operations. Storage verification passed cosine search and metadata checks at this revision.

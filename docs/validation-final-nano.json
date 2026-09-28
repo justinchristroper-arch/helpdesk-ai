@@ -1,0 +1,67 @@
+{
+  "external_calls": 1,
+  "question": "My MFA is broken while I'm working remotely. What should I do?",
+  "requested_model": "openai/gpt-4.1-nano",
+  "http_status": 200,
+  "reported_model": "gpt-4.1-nano-2025-04-14",
+  "input_tokens": 246,
+  "output_tokens": 57,
+  "reasoning_tokens": 0,
+  "finish_reason": "stop",
+  "visible_content_length": 293,
+  "referenced_fact_ids": [],
+  "validation_reason": "malformed_sentence",
+  "synthesis_used": false,
+  "deterministic_fallback": true,
+  "final_public_answer": "Based on the current IT knowledge base:\n\nMFA stops working\n1. Check that your phone has network access and automatic time enabled. [1]\n2. If your authenticator is unavailable or your phone is lost, contact IT support and request an MFA reset. [1]\n3. Support verifies identity through the registered employee recovery process before resetting enrollment. [1]\n4. Do not approve unexpected sign-in prompts. [1]\n\nBefore remote work\n1. Use an approved managed laptop, install pending company updates, confirm MFA access, and test the VPN when internal services require it. [2]\n2. Keep the service desk contact details accessible. [2]\n3. Store work files only in approved company storage. [2]",
+  "sanitized_response_structure": {
+    "root_type": "dict",
+    "root_keys": [
+      "choices",
+      "created",
+      "id",
+      "model",
+      "object",
+      "service_tier",
+      "system_fingerprint",
+      "usage"
+    ],
+    "choices_type": "list",
+    "choices_count": 1,
+    "choice_keys": [
+      "finish_reason",
+      "index",
+      "message"
+    ],
+    "message_type": "dict",
+    "message_keys": [
+      "content",
+      "role"
+    ],
+    "content_type": "str",
+    "content_length": 293,
+    "content_nonempty": true,
+    "reasoning_type": "NoneType",
+    "reasoning_length": null,
+    "line_shapes": [
+      "xxxx xx xxxxxxx xx xxxxxxx xx xxx xxxxx [xx]. xxxxxxx xxxx xxxxxx xxxx xxxxxxxx xxxxxxx xxx xxxxxxxxxx xxxxxxxx xxxxxxxx xxxxxxx xxxxxx xxxxxxxxx xxxx xxx [xx]."
+    ]
+  },
+  "sanitized_http_error": null,
+  "citations": [
+    {
+      "number": 1,
+      "document": "mfa-reset-guide",
+      "section": "MFA stops working",
+      "chunk_id": "276210ed-75c0-4f45-bfd2-32c95885d71d",
+      "maps_to_postgres_chunk": true
+    },
+    {
+      "number": 2,
+      "document": "remote-work-checklist",
+      "section": "Before remote work",
+      "chunk_id": "85a3d73d-7a00-4908-8ac0-aac482f234b8",
+      "maps_to_postgres_chunk": true
+    }
+  ]
+}

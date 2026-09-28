@@ -13,6 +13,7 @@ export type Message = {
   role: string;
   content: string;
   outcome?: string;
+  synthesis_status?: "used" | "limited" | "disabled" | "unavailable" | null;
   sources: Source[];
   intent_id?: string;
   clarification?: { intent_id: string; topic: string; question: string }[];
@@ -35,10 +36,15 @@ export async function api<T>(
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (options.body && !(options.body instanceof FormData))
     headers.set("Content-Type", "application/json");
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL || "http://localhost:8000"}${path}`,
-    { ...options, headers },
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      `${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:8000" : "")}${path}`,
+      { ...options, headers, signal: options.signal ?? AbortSignal.timeout(120_000) },
+    );
+  } catch {
+    throw new Error("The demo server is waking up or unavailable. Please wait a moment and try again. Your question has not been retried automatically.");
+  }
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error(

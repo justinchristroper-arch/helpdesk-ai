@@ -167,14 +167,14 @@ def test_provider_http_failure_is_single_call_and_fallback(monkeypatch):
     assert len(calls) == 1
 
 
-def test_complete_grounded_answer_at_token_limit_remains_safe(monkeypatch):
+def test_token_limit_response_is_rejected_even_with_complete_markers(monkeypatch):
     monkeypatch.setattr(generation, "get_settings", lambda: settings())
     monkeypatch.setattr(generation, "reserve", lambda *args: True)
     monkeypatch.setattr(generation, "evidence_is_active", lambda facts: True)
     calls = fake_http(monkeypatch,
                       "Contact IT for MFA reset. [F1]\nUse a trusted network. [F2]", finish_reason="length")
     result = generation.synthesize("Q", sample_answer(), "u", "ip")
-    assert result.state == "used" and result.finish_reason == "length" and len(calls) == 1
+    assert result.state == "invalid_response" and result.finish_reason == "length" and len(calls) == 1
 
 
 def test_only_multisource_answer_eligible():
@@ -188,3 +188,26 @@ def test_only_multisource_answer_eligible():
     result.sources = sample_answer().sources
     result.outcome = "fallback"
     assert not generation.should_synthesize(result, "What should I do?")
+
+
+@pytest.mark.parametrize("body", [[1], "not an object", {"choices": None}, {"choices": []},
+                                    {"choices": [None]}, {"choices": [{"message": []}]},
+                                    {"choices": [{"finish_reason": "stop", "message": {"content": []}}]}])
+def test_malformed_provider_schema_fails_closed(monkeypatch, body):
+    monkeypatch.setattr(generation, "get_settings", lambda: settings())
+    monkeypatch.setattr(generation, "reserve", lambda *args: True)
+    calls = fake_http(monkeypatch, None, error=body)
+    result = generation.synthesize("Q", sample_answer(), "u", "ip")
+    assert result.answer is None and result.called and len(calls) == 1
+
+
+def test_timeout_never_retries(monkeypatch):
+    monkeypatch.setattr(generation, "get_settings", lambda: settings())
+    monkeypatch.setattr(generation, "reserve", lambda *args: True)
+    attempts = []
+    def timeout(*args, **kwargs):
+        attempts.append(1)
+        raise httpx.ReadTimeout("Sanitized by boundary")
+    monkeypatch.setattr(httpx.Client, "post", timeout)
+    result = generation.synthesize("Q", sample_answer(), "u", "ip")
+    assert result.state == "provider_failure" and result.answer is None and len(attempts) == 1

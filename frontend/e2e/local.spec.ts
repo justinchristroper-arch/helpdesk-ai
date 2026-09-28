@@ -86,4 +86,23 @@ test("admin document upload, local reindex, removal and analytics", async ({ pag
   await page.reload();
   await expect(page.getByRole("heading", {name: "Top detected intents"})).toBeVisible();
   await expect(page.getByText("Clarifications", {exact: true})).toBeVisible();
+  await expect(page.getByText("Direct source answers", {exact: true})).toBeVisible();
+  await expect(page.getByText("Rewritten answers", {exact: true})).toBeVisible();
+});
+
+test("public IT topics, paraphrase and pronoun follow-up remain source-backed", async ({ page }) => {
+  await page.goto("/");
+  for (const question of [
+    "I need internal systems from outside the office",
+    "How do I request it?",
+    "What should I do if my laptop is damaged?",
+    "Can I install software without approval?",
+    "How do I request database access?",
+    "My work account is locked",
+    "What is the SLA for a high-priority incident?",
+  ]) {
+    const reply = await ask(page, question);
+    await expect(reply).toContainText("Source-backed answer");
+    await expect(reply.locator(".citations button").first()).toBeVisible();
+  }
 });

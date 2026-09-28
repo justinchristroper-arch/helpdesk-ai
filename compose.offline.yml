@@ -1,0 +1,5 @@
+# Apply during automated local regression to prevent any paid generation.
+services:
+  api:
+    environment:
+      MINDROUTER_API_KEY: ""

@@ -327,6 +327,13 @@ export function App() {
                           )}
                         </div>
                         <div className="message-content">{m.content}</div>
+                        {m.synthesis_status && m.synthesis_status !== "used" && (
+                          <p className="evidence-note">
+                            {m.synthesis_status === "limited"
+                              ? "Optional answer rewriting is limited today. This answer uses the approved source facts directly."
+                              : "This answer uses the approved source facts directly."}
+                          </p>
+                        )}
                         {!!m.clarification?.length && (
                           <div className="citations" aria-label="Clarification options">
                             {m.clarification.map((option) => (
@@ -376,6 +383,7 @@ export function App() {
                   </section>
                 )}
                 <div className="composer-wrap">
+                  {busy && <p className="loading" role="status">Checking the knowledge base… The demo server may take a minute to wake up.</p>}
                   <form className="composer" onSubmit={ask}>
                     <textarea
                       aria-label="Ask an IT question"
@@ -575,10 +583,13 @@ function Library({
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
+      setLoading(true);
       api<Document[]>("/documents", session?.token)
         .then(setDocuments)
-        .catch((e) => onError(errorText(e)));
+        .catch((e) => onError(errorText(e)))
+        .finally(() => setLoading(false));
   }, [session, onError]);
   if (manage && session?.role !== "admin")
     return (
@@ -679,7 +690,8 @@ function Library({
             </article>
           ))}
       </div>
-      {!documents.length && (
+      {loading && <p role="status">Loading documents… The demo server may need a minute to wake up.</p>}
+      {!loading && !documents.length && (
         <div className="empty">
           <BookOpen />
           <h3>No documents yet</h3>
@@ -717,6 +729,8 @@ function Library({
 type Stats = {
   total_questions: number;
   answered: number;
+  deterministic_answers: number;
+  synthesized_answers: number;
   fallbacks: number;
   clarifications: number;
   top_intents: { intent: string; questions: number }[];
@@ -757,6 +771,8 @@ function Analytics({
             {[
               ["Questions", stats.total_questions],
               ["Answered", stats.answered],
+              ["Direct source answers", stats.deterministic_answers],
+              ["Rewritten answers", stats.synthesized_answers],
               ["Insufficient evidence", stats.fallbacks],
               ["Clarifications", stats.clarifications],
               [

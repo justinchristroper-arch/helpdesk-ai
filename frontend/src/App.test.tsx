@@ -43,3 +43,26 @@ test("guest cannot see administrator document controls", () => {
   expect(screen.queryByLabelText("Upload document")).toBeNull();
   expect(screen.queryByRole("link", { name: "Manage documents" })).toBeNull();
 });
+
+test("quota uses a source answer and explains rewriting is limited", async () => {
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ok: true, status: 200, json: async () =>
+    url.endsWith("/auth/guest") ? {token: "guest", email: "guest@demo.invalid", role: "guest"} :
+    url.endsWith("/chat") ? {conversation_id: "c1", message: {id: "m1", role: "assistant", content: "Contact IT. [1]", sources: [], outcome: "answered", synthesis_status: "limited"}} : []
+  })));
+  render(<MemoryRouter><App /></MemoryRouter>);
+  fireEvent.change(screen.getByLabelText("Ask an IT question"), {target: {value: "MFA remote work"}});
+  fireEvent.click(screen.getByLabelText("Send question"));
+  await screen.findByText(/Optional answer rewriting is limited today/);
+  expect(screen.getByText("Contact IT. [1]")).toBeTruthy();
+});
+
+test("network failure explains cold start without automatic retries", async () => {
+  const fetch = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+  vi.stubGlobal("fetch", fetch);
+  render(<MemoryRouter><App /></MemoryRouter>);
+  fireEvent.change(screen.getByLabelText("Ask an IT question"), {target: {value: "VPN request"}});
+  fireEvent.click(screen.getByLabelText("Send question"));
+  await screen.findByRole("alert");
+  expect(screen.getByRole("alert").textContent).toContain("has not been retried automatically");
+  expect(fetch).toHaveBeenCalledTimes(1);
+});

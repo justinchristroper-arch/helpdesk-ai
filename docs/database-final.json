@@ -1,0 +1,1 @@
+{"tables": {"documents": 8, "document_chunks": 25, "intent_examples": 234, "generation_usage": 15, "conversations": 38, "messages": 106, "feedback": 9, "users": 28}, "chunk_dimensions": [[384, 25]], "intent_dimensions": [[384, 234]], "postgres_version": "17.11 (Debian 17.11-1.pgdg12+2)", "env_file_in_image": false}

@@ -11,4 +11,4 @@ RUN useradd --create-home appuser
 RUN chown -R appuser:appuser /app/model-cache
 ENV HF_HUB_OFFLINE=1
 USER appuser
-CMD ["sh", "-c", "alembic upgrade head && python -m app.bootstrap && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && python -m app.bootstrap && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"]

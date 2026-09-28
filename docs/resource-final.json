@@ -1,0 +1,42 @@
+{
+  "queries": 25,
+  "seconds": 31.2,
+  "process_peak_rss_mib": 316.52,
+  "samples": [
+    {
+      "queries": 0,
+      "rss_mib": 64.45
+    },
+    {
+      "queries": 5,
+      "rss_mib": 317.05
+    },
+    {
+      "queries": 10,
+      "rss_mib": 317.12
+    },
+    {
+      "queries": 15,
+      "rss_mib": 317.28
+    },
+    {
+      "queries": 20,
+      "rss_mib": 317.3
+    },
+    {
+      "queries": 25,
+      "rss_mib": 317.38
+    }
+  ],
+  "container_memory_limit": "536870912",
+  "container_memory_events": [
+    "low 0",
+    "high 0",
+    "max 0",
+    "oom 0",
+    "oom_kill 0",
+    "oom_group_kill 0"
+  ],
+  "external_generation_calls": 0,
+  "limitation": "25 sequential queries, not a concurrency benchmark or proof of no leaks."
+}

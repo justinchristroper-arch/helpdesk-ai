@@ -145,7 +145,9 @@ def owned_conversation(db, conversation_id, user):
 
 def serialize_message(db, message):
     sources = list(db.scalars(select(MessageSource).where(MessageSource.message_id == message.id, MessageSource.citation_number.is_not(None)).order_by(MessageSource.citation_number)))
-    return {"id": message.id, "role": message.role, "content": message.content, "outcome": message.outcome, "intent_id": message.intent_id, "clarification": message.clarification or [], "sources": sources}
+    state = ((message.diagnostics or {}).get("generation") or {}).get("state")
+    synthesis_status = "used" if state == "used" else "limited" if state == "quota_or_storage" else "disabled" if state == "disabled" else "unavailable" if state else None
+    return {"id": message.id, "role": message.role, "content": message.content, "outcome": message.outcome, "intent_id": message.intent_id, "clarification": message.clarification or [], "sources": sources, "synthesis_status": synthesis_status}
 
 
 @app.get("/conversations")
@@ -213,7 +215,11 @@ def analytics(user: User = Depends(admin), db: Session = Depends(get_db)):
     intents = db.execute(select(Message.intent_id, func.count()).where(Message.intent_id.is_not(None)).group_by(Message.intent_id).order_by(func.count().desc()).limit(10)).all()
     unmatched_query = Message.diagnostics["resolved_query"].as_string()
     unmatched = db.execute(select(unmatched_query, func.count()).where(Message.outcome == "fallback", Message.diagnostics.is_not(None)).group_by(unmatched_query).order_by(func.count().desc()).limit(10)).all()
-    ratings = list(db.scalars(select(Feedback.rating)))
+    ratings = db.scalar(select(func.count()).select_from(Feedback)) or 0
+    positive = db.scalar(select(func.count()).select_from(Feedback).where(Feedback.rating == 1)) or 0
+    synthesized = db.scalar(select(func.count()).select_from(Message).where(
+        Message.role == "assistant", Message.outcome == "answered",
+        Message.diagnostics["generation"]["state"].as_string() == "used")) or 0
     sources = db.execute(select(MessageSource.title, func.count().label("uses")).where(MessageSource.citation_number.is_not(None)).group_by(MessageSource.title).order_by(func.count().desc()).limit(10)).all()
     recent = db.execute(select(Message.content, Message.created_at).where(Message.role == "user").order_by(Message.created_at.desc()).limit(10)).all()
-    return {"total_questions": total, "answered": answered, "fallbacks": total - answered - clarified, "clarifications": clarified, "top_unmatched": [{"question": q, "count": n} for q,n in unmatched], "top_intents": [{"intent": i, "questions": n} for i, n in intents], "positive_feedback_percent": round(100 * ratings.count(1) / len(ratings), 1) if ratings else None, "feedback_count": len(ratings), "top_sources": [{"title": t, "uses": n} for t, n in sources], "recent_queries": [{"question": q, "created_at": t} for q, t in recent]}
+    return {"total_questions": total, "answered": answered, "deterministic_answers": answered - synthesized, "synthesized_answers": synthesized, "fallbacks": total - answered - clarified, "clarifications": clarified, "top_unmatched": [{"question": q, "count": n} for q,n in unmatched], "top_intents": [{"intent": i, "questions": n} for i, n in intents], "positive_feedback_percent": round(100 * positive / ratings, 1) if ratings else None, "feedback_count": ratings, "top_sources": [{"title": t, "uses": n} for t, n in sources], "recent_queries": [{"question": q, "created_at": t} for q, t in recent]}

@@ -60,3 +60,23 @@ def test_other_user_cannot_read_or_rate_conversation(persisted):
     assert client.get("/conversations/c1").status_code == 404
     assert client.put("/messages/m1/feedback", json={"rating": 1}).status_code == 404
     assert client.get("/conversations").json() == []
+
+
+def test_analytics_counts_and_safe_generation_status(persisted):
+    client, db, _ = persisted
+    user = db.get(User, "u1")
+    user.role = "admin"
+    for ident, outcome, state in [("direct", "answered", "quota_or_storage"),
+                                   ("synth", "answered", "used"),
+                                   ("clarify", "clarification", None)]:
+        db.add(Message(id=ident, conversation_id="c1", role="assistant", content="Synthetic test.",
+                       outcome=outcome, diagnostics={"generation": {"state": state, "private": "internal-only"}}))
+    db.commit()
+    client.put("/messages/m1/feedback", json={"rating": 1})
+    stats = client.get("/analytics").json()
+    assert (stats["total_questions"], stats["answered"], stats["deterministic_answers"],
+            stats["synthesized_answers"], stats["fallbacks"], stats["clarifications"]) == (4, 2, 1, 1, 1, 1)
+    assert stats["feedback_count"] == 1 and stats["positive_feedback_percent"] == 100
+    messages = client.get("/conversations/c1").json()
+    assert next(m for m in messages if m["id"] == "direct")["synthesis_status"] == "limited"
+    assert "internal-only" not in str(messages)

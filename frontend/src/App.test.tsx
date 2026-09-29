@@ -44,6 +44,20 @@ test("guest cannot see administrator document controls", () => {
   expect(screen.queryByRole("link", { name: "Manage documents" })).toBeNull();
 });
 
+test("saved feedback is visible when a conversation reloads", async () => {
+  sessionStorage.setItem("helpdesk-session", JSON.stringify({token: "guest", email: "guest@demo.invalid", role: "guest"}));
+  sessionStorage.setItem("helpdesk-conversation:guest@demo.invalid", "c1");
+  vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ok: true, status: 200, json: async () =>
+    url.endsWith("/conversations/c1") ? [
+      {id: "u1", role: "user", content: "VPN access?", sources: []},
+      {id: "m1", role: "assistant", content: "Ask IT. [1]", sources: [], feedback_rating: 1},
+    ] : [{id: "c1", title: "VPN access?"}]
+  })));
+  render(<MemoryRouter><App /></MemoryRouter>);
+  expect(await screen.findByText("Ask IT. [1]")).toBeTruthy();
+  expect(screen.getByRole("button", {name: "Helpful"}).getAttribute("aria-pressed")).toBe("true");
+});
+
 test("quota uses a source answer and explains rewriting is limited", async () => {
   vi.stubGlobal("fetch", vi.fn(async (url: string) => ({ok: true, status: 200, json: async () =>
     url.endsWith("/auth/guest") ? {token: "guest", email: "guest@demo.invalid", role: "guest"} :

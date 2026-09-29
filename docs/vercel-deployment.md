@@ -1,6 +1,6 @@
 # Vercel full-stack migration
 
-Target: private GitHub repository → one Vercel Services project → Neon PostgreSQL + pgvector. Hosted build and acceptance are pending; no production URL is claimed yet. Render and Docker Hub are no longer production paths. Docker Compose remains a local development option.
+Production: private GitHub repository → one Vercel Services project at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app) → Neon PostgreSQL + pgvector. Hosted deterministic chat and public browser acceptance passed on the 2026-09-29 deployment; see [the verification record](vercel-migration-verification.md) for remaining checks. Render and Docker Hub are no longer production paths. Docker Compose remains a local development option.
 
 ## Official platform conventions checked 2026-09-28
 
@@ -21,7 +21,7 @@ Python 3.12 is selected by `backend/.python-version`. Runtime requirements flatt
 
 Runtime uses the packaged model via FastEmbed's `specific_model_path`, `local_files_only=True`, and `HF_HUB_OFFLINE=1`. The small temporary cache directory is disposable. No user state is stored there. Model initialization is lazy and serialized; warm reuse is per instance, not a guarantee across requests. Each new instance still pays model import/loading cost. No model is downloaded in the browser or during a public request.
 
-Initial Linux inventory: installed Python packages 313,360,162 bytes (including development packages); one model snapshot 67,179,163 bytes; tokenizer cache 1,681,126 bytes. This is a local estimate, not the final Vercel bundle measurement. Build logs and real cold-start/resource measurements remain required.
+Initial Linux inventory: installed Python packages 313,360,162 bytes (including development packages); one model snapshot 67,179,163 bytes; tokenizer cache 1,681,126 bytes. Vercel's build reported a 302.27 MB pre-optimization bundle and a 108.17 MB deployed Python function on the first successful build. Hosted cold-start and runtime memory were not independently measured.
 
 ## Persistent state and database
 
@@ -49,6 +49,6 @@ Keep default generation caps (3/8/20, 300 tokens). Do not enable paid synthesis 
 
 ## Acceptance gate
 
-Run full backend tests against an isolated/local database, frontend tests/lint/build, real Neon verification, secret/history scan, and diff checks before push. Then verify the actual deployed health/docs, FastEmbed cold/warm queries, vector retrieval, chunk-backed citations, history, feedback, unsupported fallback, ambiguity and follow-ups. Browser acceptance must cover anonymous access, refresh/direct routes, mobile and cold-start handling. No hosted result or screenshot is implied by local tests.
+Run full backend tests against an isolated/local database, frontend tests/lint/build, real Neon verification, secret/history scan, and diff checks before push. Hosted API acceptance covered health/docs, FastEmbed query retrieval, chunk-backed citations, history, feedback, unsupported fallback, ambiguity and follow-ups. The public browser loaded anonymous chat, a source panel, the document library, refresh/direct routes, and a 390 px mobile layout. A saved feedback indicator is being added after browser testing revealed it did not rehydrate on refresh. Hosted cold-start/memory measurement and admin analytics acceptance remain open.
 
 This is a bounded synthetic portfolio demo, not an enterprise support service. Free quotas, platform beta behavior, cold starts, provider outages and connection limits apply. Do not enter confidential data. GitHub remains private until hosted acceptance and separate publication approval.

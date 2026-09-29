@@ -16,6 +16,7 @@ export type Message = {
   synthesis_status?: "used" | "limited" | "disabled" | "unavailable" | null;
   sources: Source[];
   intent_id?: string;
+  feedback_rating?: -1 | 1 | null;
   clarification?: { intent_id: string; topic: string; question: string }[];
 };
 export type Conversation = { id: string; title: string };

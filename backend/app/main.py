@@ -146,9 +146,10 @@ def owned_conversation(db, conversation_id, user):
 
 def serialize_message(db, message):
     sources = list(db.scalars(select(MessageSource).where(MessageSource.message_id == message.id, MessageSource.citation_number.is_not(None)).order_by(MessageSource.citation_number)))
+    feedback_rating = db.scalar(select(Feedback.rating).where(Feedback.message_id == message.id)) if message.role == "assistant" else None
     state = ((message.diagnostics or {}).get("generation") or {}).get("state")
     synthesis_status = "used" if state == "used" else "limited" if state == "quota_or_storage" else "disabled" if state == "disabled" else "unavailable" if state else None
-    return {"id": message.id, "role": message.role, "content": message.content, "outcome": message.outcome, "intent_id": message.intent_id, "clarification": message.clarification or [], "sources": sources, "synthesis_status": synthesis_status}
+    return {"id": message.id, "role": message.role, "content": message.content, "outcome": message.outcome, "intent_id": message.intent_id, "clarification": message.clarification or [], "sources": sources, "synthesis_status": synthesis_status, "feedback_rating": feedback_rating}
 
 
 @app.get("/conversations")

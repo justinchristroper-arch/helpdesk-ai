@@ -14,7 +14,7 @@ TO-BE demonstration: ask a natural-language IT question, receive reviewed source
 
 React/Vite → FastAPI → server-side FastEmbed (384 dimensions) → PostgreSQL cosine similarity over positive/negative intent examples and mapped chunks → evidence gate → deterministic composer → optional single-call MindRouter paraphrase → validated backend citations.
 
-History, feedback, excerpts, vectors, request limits and daily reservations persist in PostgreSQL. Administrators manage documents; public guests have isolated bearer sessions. The deployment target is one Vercel Services project (Vite at `/`, FastAPI at `/api`) plus Neon. Hosted acceptance is pending; see [the current runbook](vercel-deployment.md).
+History, feedback, excerpts, vectors, request limits and daily reservations persist in PostgreSQL. Administrators manage documents; public guests have isolated bearer sessions. The hosted architecture is one Vercel Services project (Vite at `/`, FastAPI at `/api`) plus Neon. Deterministic hosted chat and public browser flows passed; admin analytics login is still unverified because the available local demo credentials returned HTTP 401. See [the verification record](vercel-migration-verification.md).
 
 ## Engineering decisions and cost controls
 

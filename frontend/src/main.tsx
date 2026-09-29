@@ -358,19 +358,19 @@ export function App() {
                             <span>Was this helpful?</span>
                             <button
                               aria-label="Helpful"
-                              aria-pressed={ratings[m.id] === 1}
+                              aria-pressed={(ratings[m.id] ?? m.feedback_rating) === 1}
                               onClick={() => rate(m.id, 1)}
                             >
                               <ThumbsUp size={14} />
                             </button>
                             <button
                               aria-label="Not helpful"
-                              aria-pressed={ratings[m.id] === -1}
+                              aria-pressed={(ratings[m.id] ?? m.feedback_rating) === -1}
                               onClick={() => rate(m.id, -1)}
                             >
                               <ThumbsDown size={14} />
                             </button>
-                            {ratings[m.id] && <Check size={14} />}
+                            {(ratings[m.id] ?? m.feedback_rating) && <Check size={14} />}
                           </div>
                         )}
                       </article>

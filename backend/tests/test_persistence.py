@@ -52,6 +52,7 @@ def test_feedback_updates_without_duplicates(persisted):
     records = list(db.scalars(select(Feedback)))
     assert len(records) == 1
     assert records[0].rating == -1
+    assert client.get("/conversations/c1").json()[0]["feedback_rating"] == -1
 
 
 def test_other_user_cannot_read_or_rate_conversation(persisted):

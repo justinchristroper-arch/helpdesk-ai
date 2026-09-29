@@ -4,7 +4,7 @@
 
 HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can paraphrase approved source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live synthesis path has not yet passed validation; deterministic answers remain available.
 
-Status: deterministic retrieval and citations are verified locally and on the hosted Vercel + Neon deployment at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app). The GitHub repository remains private. Optional MindRouter synthesis is disabled in production and remains unverified there; no paid requests were made during this migration. Hosted admin analytics is still blocked by a credential mismatch. See the [Vercel deployment runbook](docs/vercel-deployment.md) and [verification record](docs/vercel-migration-verification.md). Public repository publication is not authorized.
+Status: deterministic retrieval and citations are verified locally and on the hosted Vercel + Neon deployment at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app). The GitHub repository remains private. Optional MindRouter synthesis is disabled in production and remains unverified there; no paid requests were made during this migration. Hosted admin analytics remains unverified because the Neon database has no admin account. See the [Vercel deployment runbook](docs/vercel-deployment.md) and [verification record](docs/vercel-migration-verification.md). Public repository publication is not authorized.
 
 ## Why this architecture
 

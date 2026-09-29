@@ -14,7 +14,7 @@ TO-BE demonstration: ask a natural-language IT question, receive reviewed source
 
 React/Vite → FastAPI → server-side FastEmbed (384 dimensions) → PostgreSQL cosine similarity over positive/negative intent examples and mapped chunks → evidence gate → deterministic composer → optional single-call MindRouter paraphrase → validated backend citations.
 
-History, feedback, excerpts, vectors, request limits and daily reservations persist in PostgreSQL. Administrators manage documents; public guests have isolated bearer sessions. The hosted architecture is one Vercel Services project (Vite at `/`, FastAPI at `/api`) plus Neon. Deterministic hosted chat and public browser flows passed; admin analytics remains unverified because Neon has no admin account. See [the verification record](vercel-migration-verification.md).
+History, feedback, excerpts, vectors, request limits and daily reservations persist in PostgreSQL. Administrators manage documents; public guests have isolated bearer sessions. The hosted architecture is one Vercel Services project (Vite at `/`, FastAPI at `/api`) plus Neon. Deterministic hosted chat and public browser flows passed. A temporary production administrator verified the analytics API and page; anonymous analytics returned 401, guest analytics and document mutations returned 403, and the temporary account was removed afterward. MindRouter is disabled in production because no hosted key is configured. See [the live application](https://helpdesk-ai-mu-ten.vercel.app) and [verification record](vercel-migration-verification.md).
 
 ## Engineering decisions and cost controls
 
@@ -43,4 +43,8 @@ English-focused synthetic corpus; 18 curated intents; no OCR, enterprise SSO or 
 - Why separate real chunk membership, inspected regression performance and semantic correctness?
 - What did real tests show? Transport success is not application success; one-call budgets matter.
 - What is needed for enterprise use? Identity, retention, threat assessment, observability, distributed limits and independent evaluation.
-- Why is hosted acceptance separate? TLS, CORS, proxy identity, cold starts, memory, actual URLs and deployed screenshots still need measurement.
+- What did hosted acceptance add? It exercised the deployed chat, citations, source panel, fallback, clarification, document library, authentication boundary and administrator analytics against Vercel and Neon.
+
+## Production evidence
+
+Real deployed captures are stored in [`docs/screenshots`](screenshots/): main chat, a multi-source answer with citations, source evidence, unsupported fallback plus ambiguity clarification, administrator analytics, and the document library. The administrator screenshot was captured from an authenticated production session; the temporary account used for acceptance was deleted afterward.

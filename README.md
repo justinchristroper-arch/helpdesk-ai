@@ -4,7 +4,7 @@
 
 HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can paraphrase approved source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live synthesis path has not yet passed validation; deterministic answers remain available.
 
-Status: deterministic retrieval and citations are verified locally and on the hosted Vercel + Neon deployment at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app). The GitHub repository remains private. Optional MindRouter synthesis is disabled in production and remains unverified there; no paid requests were made during this migration. Hosted admin analytics remains unverified because the Neon database has no admin account. See the [Vercel deployment runbook](docs/vercel-deployment.md) and [verification record](docs/vercel-migration-verification.md). Public repository publication is not authorized.
+Status: deterministic retrieval and citations are verified locally and on the hosted Vercel + Neon deployment at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app). Hosted admin analytics returned real usage data for a temporary administrator; anonymous access returned 401 and authenticated guest access to analytics and document mutations returned 403. The temporary administrator was removed after acceptance. The GitHub repository remains private. Optional MindRouter synthesis is disabled in production because no hosted key is configured, so no paid hosted request was made. See the [Vercel deployment runbook](docs/vercel-deployment.md) and [verification record](docs/vercel-migration-verification.md). Public repository publication requires explicit approval.
 
 ## Why this architecture
 
@@ -24,7 +24,7 @@ The FAQ path skips broader retrieval when the intent score is very high; it stil
 
 ## Local setup
 
-Copy .env.example to .env and set a strong database password, matching DATABASE_URL and random JWT_SECRET. An optional MINDROUTER_API_KEY can be placed in ignored backend/.env; its URL and model are environment settings, with openai/gpt-4.1-nano as the default. Run docker compose up --build -d. For automated regression use `docker compose -f docker-compose.yml -f compose.offline.yml up --build -d` to disable paid synthesis even when a local key exists. First startup applies Alembic 0004, seeds eight bundled synthetic documents into an empty library, and indexes intent examples. Existing libraries are preserved.
+Copy .env.example to .env and set a strong database password, matching DATABASE_URL and random JWT_SECRET. An optional MINDROUTER_API_KEY can be placed in ignored backend/.env; its URL and model are environment settings, with openai/gpt-4.1-nano as the default. Run docker compose up --build -d. For automated regression use `docker compose -f docker-compose.yml -f compose.offline.yml up --build -d` to disable paid synthesis even when a local key exists. First startup applies migrations through Alembic 0005, seeds eight bundled synthetic documents into an empty library, and indexes intent examples. Existing libraries are preserved.
 
 Run npm ci and npm run dev inside frontend. Open http://localhost:5173 and ask a question immediately. Guest sessions are isolated and stored in sessionStorage. Use the existing management command for an admin account: docker compose exec api python -m app.manage create-user --email admin@example.test --role admin.
 
@@ -40,6 +40,17 @@ The Docker image downloads the embedding model and tokenizer at build time. Runt
 
 [Evaluation results](docs/evaluation-semantic.json) record all cases and definitions. The benchmark was inspected during development and is not an independent generalization estimate. Initial validation failures are preserved separately.
 
+## Production screenshots
+
+Captured from the deployed application on 2026-09-29:
+
+- [Main chat](docs/screenshots/main-chat.png)
+- [Source-backed answer and citations](docs/screenshots/answer-citations.png)
+- [Source evidence panel](docs/screenshots/source-evidence.png)
+- [Unsupported fallback and ambiguity clarification](docs/screenshots/fallback-ambiguity.png)
+- [Administrator analytics](docs/screenshots/admin-analytics.png)
+- [Document library](docs/screenshots/document-library.png)
+
 ## Maintenance and trade-offs
 
 See [dataset maintenance](docs/dataset-maintenance.md), [architecture](docs/design.md), [deployment](docs/deployment.md), [verification](docs/verification.md), and [case study](docs/case-study.md).
@@ -48,4 +59,4 @@ Semantic coverage depends on curated examples and approved fact mappings. Upload
 
 Paraphrase grounding is a deterministic structural/lexical heuristic, not a guarantee of semantic correctness. Defaults are 3 generation attempts/user, 8/IP and 20 globally per UTC day, with at most one 300-token request per eligible question. Failed attempts count; there are no retries or answer-generation cache. Hosted proxy identity must be verified before claiming per-visitor IP behavior. Production targets Vercel + Neon; Docker Compose remains supported for local development. [The current runbook](docs/vercel-deployment.md) lists settings and pending hosted checks.
 
-Historical citations remain snapshots after a source is removed. Synthetic policy corpus only; do not enter confidential data. Screenshots labelled local are local verification evidence, not deployed portfolio screenshots.
+Historical citations remain snapshots after a source is removed. Synthetic policy corpus only; do not enter confidential data. Screenshots in `docs/screenshots/` are deployed production captures; screenshots labelled local elsewhere remain local verification evidence.

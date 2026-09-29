@@ -24,7 +24,10 @@ def dataset():
         for source in item["evidence"]:
             if not source["facts"] or any(len(fact) < 12 for fact in source["facts"]):
                 raise ValueError("Approved facts must contain substantive exact source text")
-    return {i["intent_id"]: i for i in data["intents"]}, hashlib.sha256(raw).hexdigest()
+    # Git may check out this JSON with CRLF on Windows, while Vercel uses LF.
+    # Keep the index version identical across both environments.
+    canonical = raw.replace(b"\r\n", b"\n")
+    return {i["intent_id"]: i for i in data["intents"]}, hashlib.sha256(canonical).hexdigest()
 
 
 def index_intents(db):

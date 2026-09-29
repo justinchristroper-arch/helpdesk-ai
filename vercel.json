@@ -24,6 +24,7 @@
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": { "service": "api" } },
+    { "source": "/", "destination": { "service": "web" } },
     { "source": "/:path*", "destination": { "service": "web" } }
   ]
 }

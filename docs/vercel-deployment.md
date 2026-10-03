@@ -1,6 +1,6 @@
 # Vercel full-stack migration
 
-Production: private GitHub repository → one Vercel Services project at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app) → Neon PostgreSQL + pgvector. Hosted deterministic chat and public browser acceptance passed on the 2026-09-29 deployment; see [the verification record](vercel-migration-verification.md) for remaining checks. Render and Docker Hub are no longer production paths. Docker Compose remains a local development option.
+Production: public [GitHub repository](https://github.com/justinchristroper-arch/helpdesk-ai) → one public Vercel Services deployment at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app/) → Neon PostgreSQL + pgvector. Hosted deterministic chat, citations, public browser flows and admin/auth acceptance passed; see [the verification record](vercel-migration-verification.md). Optional MindRouter synthesis is disabled and remains unverified in production. Render and Docker Hub are no longer production paths. Docker Compose remains a local development option.
 
 ## Official platform conventions checked 2026-09-28
 
@@ -41,7 +41,7 @@ Configure through Vercel secret environment settings, never frontend variables:
 | `JWT_SECRET` | New securely generated production value, at least 32 characters |
 | `DATABASE_POOL_MODE` | `null` |
 | `CORS_ORIGINS` | `[]` |
-| `MINDROUTER_API_KEY` | Unset for initial acceptance |
+| `MINDROUTER_API_KEY` | Unset in the verified production baseline |
 | `MINDROUTER_BASE_URL` | `https://api.mindrouter.io/v1` |
 | `MINDROUTER_MODEL` | `openai/gpt-4.1-nano` |
 
@@ -49,6 +49,6 @@ Keep default generation caps (3/8/20, 300 tokens). Do not enable paid synthesis 
 
 ## Acceptance gate
 
-Run full backend tests against an isolated/local database, frontend tests/lint/build, real Neon verification, secret/history scan, and diff checks before push. Hosted API acceptance covered health/docs, FastEmbed query retrieval, chunk-backed citations, history, feedback, unsupported fallback, ambiguity and follow-ups. The public browser loaded anonymous chat, a source panel, the document library, refresh/direct routes, and a 390 px mobile layout. The saved feedback indicator remained selected after refresh on the final application build. Hosted cold-start/memory measurement remains open. Admin analytics cannot be accepted until an admin account is provisioned in Neon; read-only inspection found none.
+Run full backend tests against an isolated/local database, frontend tests/lint/build, real Neon verification, secret/history scan, and diff checks before push. Hosted API acceptance covered health/docs, FastEmbed query retrieval, chunk-backed citations, history, feedback, unsupported fallback, ambiguity and follow-ups. The public browser loaded anonymous chat, a source panel, the document library, refresh/direct routes, and a 390 px mobile layout. The saved feedback indicator remained selected after refresh on the final application build. Hosted admin login and analytics returned HTTP 200 with real usage data; anonymous analytics returned 401, and guest analytics and document mutations returned 403. Temporary administrators were removed after acceptance. Hosted cold-start/memory measurement remains open.
 
-This is a bounded synthetic portfolio demo, not an enterprise support service. Free quotas, platform beta behavior, cold starts, provider outages and connection limits apply. Do not enter confidential data. GitHub remains private until hosted acceptance and separate publication approval.
+This is a bounded synthetic portfolio demo, not an enterprise support service. Free quotas, platform beta behavior, cold starts, provider outages and connection limits apply. Do not enter confidential data. The GitHub repository and Vercel deployment are public; database and server credentials remain secret.

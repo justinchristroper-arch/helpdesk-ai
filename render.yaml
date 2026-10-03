@@ -1,4 +1,4 @@
-# ARCHIVED: not the production target. Use root vercel.json and docs/vercel-deployment.md.
+# ARCHIVED: current production is Vercel + Neon. Use root vercel.json and docs/vercel-deployment.md.
 # Retained only as historical configuration; do not create a Render service.
 services:
   - type: web

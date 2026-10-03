@@ -4,7 +4,7 @@
 
 HelpDesk AI understands bounded natural-language IT questions using server-side FastEmbed, semantic intent examples, PostgreSQL/pgvector retrieval, deterministic response composition, and inspectable citations. Optional MindRouter synthesis can paraphrase approved source-backed facts for multi-source or long supported answers when a backend key and daily quota are available. Its live synthesis path has not yet passed validation; deterministic answers remain available.
 
-Status: deterministic retrieval and citations are verified locally and on the hosted Vercel + Neon deployment at [helpdesk-ai-mu-ten.vercel.app](https://helpdesk-ai-mu-ten.vercel.app). Hosted admin analytics returned real usage data for a temporary administrator; anonymous access returned 401 and authenticated guest access to analytics and document mutations returned 403. The temporary administrator was removed after acceptance. The GitHub repository remains private. Optional MindRouter synthesis is disabled in production because no hosted key is configured, so no paid hosted request was made. See the [Vercel deployment runbook](docs/vercel-deployment.md) and [verification record](docs/vercel-migration-verification.md). Public repository publication requires explicit approval.
+Status: the [GitHub repository](https://github.com/justinchristroper-arch/helpdesk-ai) and [Vercel deployment](https://helpdesk-ai-mu-ten.vercel.app/) are public. Deterministic retrieval and citations are verified locally and on the hosted Vercel + Neon deployment. Hosted admin analytics returned real usage data for a temporary administrator; anonymous access returned 401 and authenticated guest access to analytics and document mutations returned 403. The temporary administrator was removed after acceptance. Optional MindRouter synthesis is disabled and remains unverified in production; it is not part of the verified hosted baseline. See the [Vercel deployment runbook](docs/vercel-deployment.md) and [verification record](docs/vercel-migration-verification.md).
 
 ## Why this architecture
 
@@ -53,7 +53,7 @@ Captured from the deployed application on 2026-09-29:
 
 ## Maintenance and trade-offs
 
-See [dataset maintenance](docs/dataset-maintenance.md), [architecture](docs/design.md), [deployment](docs/deployment.md), [verification](docs/verification.md), and [case study](docs/case-study.md).
+See [dataset maintenance](docs/dataset-maintenance.md), [architecture](docs/design.md), [deployment](docs/vercel-deployment.md), [verification](docs/vercel-migration-verification.md), and [case study](docs/case-study.md).
 
 Semantic coverage depends on curated examples and approved fact mappings. Uploaded documents become searchable in the library, but answer coverage requires a reviewed intent mapping; arbitrary uploads do not silently become authoritative answer templates. English-focused, no OCR, no enterprise identity/retention workflow. Generation reservations and ordinary request limits persist in PostgreSQL across instances. Exact quotation proves source membership, not that the matcher understood every possible question.
 
